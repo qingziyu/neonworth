@@ -1,0 +1,5 @@
+id,date,account_id,merchant,amount,currency,flow,category,pending
+example-pay,2026-01-02,example-checking,Example Employer,-3200.00,USD,income,Payroll,false
+example-rent,2026-01-03,example-checking,Example Apartment,1100.00,USD,expense,Housing,false
+example-food,2026-01-04,example-checking,"Example Grocer, Main Street",65.25,USD,expense,Groceries,false
+example-unknown,2026-01-05,example-checking,Unknown payment,-20.00,USD,review,Other,false

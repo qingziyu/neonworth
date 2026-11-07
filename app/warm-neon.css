@@ -1,0 +1,165 @@
+/* One author-published font, served by Neonworth. See public/fonts/README.md. */
+@font-face {
+  font-family: "Neonworth Space Grotesk";
+  src: url("/fonts/space-grotesk-variable.woff2") format("woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Presentation only: print and forced colors retain their existing palettes.
+   No finance, chart, editor, or dialog-ancestor geometry is animated here. */
+@media screen and (forced-colors: none) {
+  .personal-experience {
+    --font-display: "Neonworth Space Grotesk", var(--font-system);
+    --workspace-radius: 16px;
+    --workspace-inset-radius: 8px;
+    background: var(--paper);
+  }
+
+  .personal-experience :is(.brand, .sidebar nav a, .sidebar .data-nav, .nav-group > summary, .workspace-pins a, .button, .workspace-link, .text-link, .signal-action) {
+    font-family: var(--font-display);
+  }
+
+  .personal-experience[data-motion] .report-masthead {
+    background: var(--surface);
+    border-color: var(--structural-border);
+    box-shadow:
+      inset 1px 0 color-mix(in srgb, var(--decor-cyan) 70%, transparent),
+      inset -1px 0 color-mix(in srgb, var(--decor-magenta) 55%, transparent),
+      0 0 18px color-mix(in srgb, var(--decor-cyan) 7%, transparent),
+      0 12px 30px color-mix(in srgb, var(--shadow-ink) 60%, transparent);
+  }
+
+  /* Opaque, neutral interiors carry the records. Only selected edges emit
+     light; the background never becomes a translucent wash over the figures. */
+  .personal-experience .sidebar {
+    background: var(--paper);
+    border-right-color: var(--structural-border);
+    box-shadow: inset -1px 0 color-mix(in srgb, var(--decor-cyan) 25%, transparent);
+  }
+  .personal-experience .sidebar :is(nav a, .data-nav):hover {
+    color: var(--structural-strong);
+    background: var(--surface-muted);
+  }
+  .personal-experience .sidebar :is(nav a.active, .data-nav.active) {
+    color: var(--structural-strong);
+    background: var(--structural-soft);
+    border-color: var(--structural-border);
+    box-shadow:
+      inset 3px 0 var(--decor-cyan),
+      inset -1px 0 color-mix(in srgb, var(--decor-magenta) 65%, transparent),
+      0 0 14px color-mix(in srgb, var(--decor-cyan) 12%, transparent);
+  }
+  .personal-experience .workspace-nav-marker {
+    background: var(--structural-soft);
+    border-color: var(--structural-border);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--decor-cyan) 20%, transparent);
+  }
+  .personal-experience :is(.workspace-summary, .spending-decision, .budget-control-deck) {
+    background: var(--surface);
+    border-color: var(--structural-border);
+    box-shadow:
+      inset 0 1px color-mix(in srgb, var(--decor-cyan) 40%, transparent),
+      inset 0 -1px color-mix(in srgb, var(--decor-magenta) 24%, transparent);
+  }
+  .personal-experience[data-motion] .fire-dashboard .fire-target {
+    background: var(--surface);
+    box-shadow: inset 3px 0 var(--decor-ember);
+  }
+  .personal-experience .workspace-fire-surface {
+    background: var(--surface);
+    box-shadow:
+      inset 3px 0 var(--violet),
+      inset -1px 0 var(--decor-cyan),
+      0 0 18px color-mix(in srgb, var(--violet) 9%, transparent);
+  }
+  .personal-experience .signal-action {
+    box-shadow:
+      inset 0 1px color-mix(in srgb, var(--decor-ember) 45%, transparent),
+      0 0 12px color-mix(in srgb, var(--decor-magenta) 9%, transparent);
+  }
+
+  /* One card/inset grammar across reports. Signature masthead/action corners
+     remain distinct; semantic warning, coverage and funding-lane tints do not
+     participate in these neutral surface rules. */
+  .personal-experience[data-motion] :is(.panel, .workspace-card, .workspace-summary, .spending-decision, .review-year-masthead, .year-review-metrics > section),
+  .personal-experience[data-motion] .goals-view :is(.goal-card, .goals-trend-grid > .panel),
+  .personal-experience[data-motion] .budget-page .budget-hero {
+    border-radius: var(--workspace-radius);
+  }
+  .personal-experience[data-motion] :is(.experience-scope, .ledger-summary, .budget-control-deck, .spending-decision .report-options, .budget-upcoming-total, .budget-funding-lanes, .budget-upcoming-split > div, .review-event-list > .review-event-card) {
+    border-radius: var(--workspace-inset-radius);
+  }
+  .personal-experience[data-motion] :is(.workspace-summary-budget, .spending-decision .report-options, .budget-upcoming-total, .budget-bridge-total, .budget-funding-lanes > .budget-all-in),
+  .personal-experience[data-motion] .year-review-metrics > section:first-child {
+    background: var(--surface-muted);
+    border-color: var(--border);
+  }
+  .personal-experience[data-motion] :is(.fire-dashboard, .goals-view .goal-card, .goals-view .goals-trend-grid > .panel) {
+    border-color: var(--border);
+  }
+  .personal-experience[data-motion] .budget-page .budget-hero:not(.is-over) {
+    background: var(--surface);
+    border-color: var(--border);
+  }
+  /* Later budget layout rules previously obscured the original danger surface. */
+  .personal-experience[data-motion] .budget-hero.is-over {
+    background: var(--danger-soft);
+    border-color: var(--danger-border);
+  }
+
+  /* The grid owns spacing: avoid adding a panel's bottom margin to its gap.
+     Existing compact/mobile --workspace-gap values remain authoritative. */
+  .personal-experience[data-motion] :is(.personal-overview, .workspace-planning, .spending-grid, .budget-main-grid, .goals-view .goal-card-grid, .goals-view .goals-trend-grid, .data-top-grid, .review-event-list) {
+    gap: var(--workspace-gap);
+  }
+  .personal-experience[data-motion] :is(.spending-grid, .budget-main-grid, .goals-view .goal-card-grid, .goals-view .goals-trend-grid, .data-top-grid) {
+    margin-bottom: var(--workspace-gap);
+  }
+  .personal-experience[data-motion] :is(.spending-grid, .budget-main-grid, .goals-view .goal-card-grid, .goals-view .goals-trend-grid, .data-top-grid) > .panel {
+    margin-bottom: 0;
+  }
+  .personal-experience[data-motion] :is(.report-masthead, .experience-scope, .spending-decision, .budget-control-deck, .budget-hero, .ledger-summary, .review-year-masthead) {
+    margin-bottom: var(--workspace-gap);
+  }
+
+  /* Reserve a text column before the decorative art begins. */
+  .personal-experience[data-motion] .report-masthead .report-masthead__copy {
+    flex-basis: 54%;
+    max-width: 54%;
+  }
+  .personal-experience[data-motion] .report-masthead .report-masthead__kicker { max-width: 52%; }
+
+  @media (max-width: 600px) {
+    /* The top row pairs a small index with the art; the full-width title starts
+       below both. Bright fills cannot sit underneath long title lines. */
+    .personal-experience[data-motion] .report-masthead .report-masthead__content { gap: 12px; }
+    .personal-experience[data-motion] .report-masthead .report-masthead__kicker {
+      min-height: 80px;
+      max-width: 46%;
+      align-content: center;
+    }
+    .personal-experience[data-motion] .report-masthead .report-masthead__copy { flex-basis: 100%; max-width: 100%; }
+    .personal-experience[data-motion] .report-masthead .report-masthead__title { max-width: 100%; }
+    .personal-experience[data-motion] .report-masthead .workspace-scene { left: 50%; top: 0; height: 100px; }
+  }
+
+  /* Navigation is cool; primary actions retain the independent peach role. */
+  .personal-experience .workspace-pins a[aria-current="page"] {
+    color: var(--structural-strong);
+    background: var(--structural-soft);
+    border-color: var(--structural-border);
+    box-shadow:
+      inset 0 -2px var(--decor-cyan),
+      0 0 12px color-mix(in srgb, var(--decor-cyan) 10%, transparent);
+  }
+
+  /* Financial text stays plain, tabular and in the established system face,
+     including values inside an action that otherwise uses the display font. */
+  .personal-experience[data-motion] :is(.metric > strong, .workspace-summary-figures strong, .goal-amount, .spending-summary-strip strong, .budget-headroom > strong, .networth-hero strong, .txn-amount, .category-row b, .cashflow-equation strong, .savings-big, .fire-dashboard strong, .fire-dashboard dd, .edit-amount, td) {
+    font-family: var(--font-system);
+    font-variant-numeric: lining-nums tabular-nums;
+    text-shadow: none;
+  }
+}

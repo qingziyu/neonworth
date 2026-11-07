@@ -1,0 +1,58 @@
+/* Static instrument finish. Native widths, heights, data colors and privacy
+   remain owned by each report. Print and forced colors keep the base bars. */
+@media screen and (forced-colors: none) {
+  .personal-experience {
+    --data-bar-edge: var(--paper);
+    --data-bar-light: var(--ink);
+    --data-bar-edge-opacity: .62;
+    --data-bar-highlight-opacity: .22;
+    --data-bar-cap-opacity: .3;
+  }
+
+  .personal-experience .chart-bar__detail { visibility: inherit; }
+  .personal-experience .chart-bar__edge {
+    fill: none;
+    stroke: var(--data-bar-edge);
+    stroke-opacity: var(--data-bar-edge-opacity);
+  }
+  .personal-experience .chart-bar__highlight {
+    stroke: var(--data-bar-light);
+    stroke-opacity: var(--data-bar-highlight-opacity);
+  }
+  .personal-experience .chart-bar__cap {
+    stroke: var(--data-bar-light);
+    stroke-opacity: var(--data-bar-cap-opacity);
+  }
+
+  /* Specificity also wins when Budget/FIRE feature CSS arrives after this
+     file. Only the track changes color; fills retain category/status roles. */
+  .personal-experience.unified-dashboard[data-motion] :is(.category-track, .budget-progress, .budget-envelope-track, .goal-progress-track, .fire-progress) {
+    background: var(--paper);
+    border-radius: 1px;
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  .personal-experience.unified-dashboard[data-motion] :is(.category-track, .budget-progress, .budget-envelope-track, .goal-progress-track, .fire-progress) > span {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1px;
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--data-bar-light) 28%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, var(--data-bar-edge) 35%, transparent);
+  }
+
+  /* Horizontal striation is decorative, never an axis or percentage scale.
+     The leaf clips it to its exact fill box, including an empty zero width. */
+  .personal-experience.unified-dashboard[data-motion] :is(.category-track, .budget-progress, .budget-envelope-track, .goal-progress-track, .fire-progress) > span::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, transparent 0 2px, color-mix(in srgb, var(--data-bar-edge) 12%, transparent) 2px 3px);
+  }
+
+  .personal-experience .legend i {
+    border-radius: 1px;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--data-bar-light) 28%, transparent);
+  }
+}

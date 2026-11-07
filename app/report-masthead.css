@@ -1,0 +1,150 @@
+/*
+ * Indexed report masthead. The container has no animation, transforms or
+ * backdrop-filter. Clipping lives on the art layer only, so focus outlines and
+ * popovers in the action slot are never cut off by the header.
+ */
+.personal-experience .report-masthead {
+  --report-masthead-navy-deep: var(--paper);
+  --report-masthead-navy: var(--surface-muted);
+
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(1rem, 0.7rem + 1.5vw, 2rem);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: 0.75rem;
+  color: var(--ink);
+  background-color: var(--surface);
+  background-image: linear-gradient(
+    105deg,
+    var(--surface) 0%,
+    var(--report-masthead-navy) 62%,
+    var(--report-masthead-navy-deep) 100%
+  );
+}
+
+.personal-experience .report-masthead .report-masthead__content {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.625rem, 0.5rem + 0.5vw, 1rem);
+  min-width: 0;
+}
+
+.personal-experience .report-masthead .report-masthead__kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  min-width: 0;
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.personal-experience .report-masthead .report-masthead__index {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.personal-experience .report-masthead .report-masthead__rule {
+  flex: none;
+  width: 1.5rem;
+  height: 1px;
+  background-color: var(--accent);
+}
+
+.personal-experience .report-masthead .report-masthead__index,
+.personal-experience .report-masthead .report-masthead__family {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.personal-experience .report-masthead .report-masthead__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  min-width: 0;
+}
+
+.personal-experience .report-masthead .report-masthead__copy {
+  flex: 1 1 28rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.personal-experience .report-masthead .report-masthead__title {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.875rem, 1.4rem + 2.4vw, 3.25rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.personal-experience .report-masthead .report-masthead__description {
+  max-width: 62ch;
+  margin: 0.625rem 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.personal-experience .report-masthead .report-masthead__scope {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.125rem 0.5rem;
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0.75rem 0 0;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background-color: var(--surface-muted);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.personal-experience .report-masthead .report-masthead__scope-label {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.personal-experience .report-masthead .report-masthead__scope-value {
+  min-width: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.personal-experience .report-masthead .report-masthead__actions {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  max-width: 54%;
+}
+
+@media (max-width: 600px) {
+  .personal-experience .report-masthead .report-masthead__actions { max-width: 100%; }
+}
+
+@media (max-width: 30rem) {
+  .personal-experience .report-masthead .report-masthead__actions { flex-basis: 100%; }
+}

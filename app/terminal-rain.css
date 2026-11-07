@@ -1,0 +1,38 @@
+/* Persistent, noninteractive viewport ornament; independent of report shells. */
+.terminal-rain { display: none; }
+@media screen and (forced-colors: none) {
+  /* A persistent layout also owns non-app routes, including 404. Hide decoration
+     unless the real financial shell exists; unsupported :has stays static off. */
+  body:has(.app.unified-dashboard.personal-workspace.personal-experience) .terminal-rain {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+  .terminal-rain__canvas, .terminal-rain__fallback {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .terminal-rain__canvas:not([data-ready="true"]) { visibility: hidden; }
+  .terminal-rain__canvas[data-ready="true"] + .terminal-rain__fallback { visibility: hidden; }
+  .terminal-rain__fallback { opacity: .62; fill: #38de89; }
+  .terminal-rain__fallback text { font: 600 15px ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+  .terminal-rain__fallback .terminal-rain__teal { fill: #28c4af; }
+  .terminal-rain__fallback .terminal-rain__head { fill: #e5fff6; }
+
+  /* Preserve opaque panels, navigation, headers and dialogs. Only the app's
+     base canvas reveals the persistent sibling behind it; no shell animation. */
+  .app.unified-dashboard.personal-workspace.personal-experience {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+  }
+  .personal-experience .networth-hero { background: var(--paper); }
+}

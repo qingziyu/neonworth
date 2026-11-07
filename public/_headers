@@ -1,0 +1,8 @@
+# Static assets remain behind the the deployment owner-only gate. Avoid shared caches;
+# this bundle contains private classification rules, even without account data.
+/*
+  Cache-Control: private, no-store, max-age=0
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; sandbox

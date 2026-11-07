@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  regression-and-build:
+    name: Regression, types, and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - name: Scan source and history for secrets
+        run: node scripts/scan-secrets.mjs
+      - name: Install pinned pnpm
+        run: npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit all locked dependencies
+        run: pnpm audit --audit-level=high
+      - name: Run regression tests
+        run: npm test
+      - name: Check TypeScript
+        run: npm run typecheck
+      - name: Build Worker and assets
+        run: npm run build
+      - name: Build synthetic public demo
+        run: npm run demo:build
+        env:
+          DEMO_BASE_PATH: ${{ vars.DEMO_BASE_PATH }}
+      - name: Ensure checks did not change source
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Upload synthetic demo for Pages
+        if: vars.PUBLISH_DEMO == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: demo-dist
+
+  publish-demo:
+    name: Publish synthetic demo
+    if: vars.PUBLISH_DEMO == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: regression-and-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - name: Publish checked synthetic demo
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

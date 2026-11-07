@@ -1,0 +1,77 @@
+.goals-view .goal-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fire-dashboard{margin:20px 0;min-width:0}
+.fire-dashboard .fire-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.fire-dashboard .goal-title{min-width:0;align-items:center}
+.fire-dashboard h2{font-size:22px}.fire-dashboard h3{font-size:16px}
+.fire-dashboard p,.fire-dashboard small{color:var(--muted);font-size:12px;line-height:1.8}
+.fire-dashboard .fire-target{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;padding:22px;border:1px solid var(--accent-border);border-radius:10px;background:var(--accent-soft)}
+.fire-dashboard .fire-target span,.fire-dashboard dt,.fire-dashboard .fire-metrics span{font-size:12px;color:var(--muted)}
+.fire-dashboard strong,.fire-dashboard dd{color:var(--ink);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.fire-dashboard .fire-target strong{font-size:clamp(30px,4vw,48px);line-height:1.3;display:block;margin:7px 0}
+.fire-dashboard dl{display:grid;gap:10px;align-content:center;margin:0}.fire-dashboard dl>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}.fire-dashboard dd{font-size:19px;font-weight:650;margin:0}
+.fire-dashboard .fire-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:22px 0 16px}.fire-dashboard .fire-metrics>div{display:grid;align-content:start;gap:7px;min-width:0}.fire-dashboard .fire-metrics strong{font-size:24px}.fire-dashboard .fire-metrics small{font-size:11px}
+.fire-dashboard .fire-progress{height:7px;border-radius:6px;background:var(--surface-muted);overflow:hidden}.fire-dashboard .fire-progress>span{display:block;height:100%;background:var(--accent)}
+.fire-dashboard .fire-projection{border-top:1px solid var(--border);padding-top:20px;margin-top:24px}.fire-dashboard .fire-next-step{padding:14px;margin-top:12px;background:var(--surface-muted);border-radius:8px}.fire-dashboard .fire-definitions{border-top:1px solid var(--border);margin-top:20px;padding-top:16px}.fire-dashboard summary{cursor:pointer;color:var(--accent);font-size:12px;min-height:24px}.fire-dashboard .fire-definitions p{margin-top:12px;overflow-wrap:anywhere}
+.planning-editor .fire-help{display:block;color:var(--muted);font-size:11px;line-height:1.7;font-weight:400;margin-top:6px}.planning-editor .planning-form-grid>label{min-width:0}.planning-editor input{min-width:0;max-width:100%}
+@media(max-width:700px){.goals-view .goal-card-grid{grid-template-columns:1fr}.fire-dashboard .fire-target{grid-template-columns:1fr;gap:18px;padding:16px}.fire-dashboard .fire-metrics{grid-template-columns:1fr;gap:18px}.fire-dashboard .fire-heading{gap:12px}.fire-dashboard h2{font-size:20px}.fire-dashboard .goal-title{gap:8px}.fire-dashboard .goal-title>div{min-width:0}.fire-dashboard .fire-heading p{overflow-wrap:anywhere}.fire-dashboard .fire-metrics strong{font-size:23px}}
+
+/* The experience composition changes hierarchy only; every figure still comes
+   from summarizeFire and no chart/value geometry has animation. */
+.personal-experience .fire-dashboard { margin: 0 0 28px; padding: 0; border-radius: 18px; border-color: var(--accent-border); overflow: hidden; }
+.personal-experience .fire-dashboard::before,
+.personal-experience .fire-dashboard::after { content: none; }
+.personal-experience .fire-dashboard .fire-heading { margin: 0; padding: 22px 26px; border-bottom: 1px solid var(--border); }
+.personal-experience .fire-dashboard .fire-heading h2 { font-size: 24px; letter-spacing: -.5px; }
+.personal-experience .fire-dashboard .fire-heading > .text-link { min-height: 42px; padding: 9px 13px; border: 1px solid var(--control-border); border-radius: 8px; }
+.personal-experience .fire-console-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.personal-experience .fire-dashboard .fire-console-kicker { display: block; color: var(--accent); font-size: 11px; letter-spacing: .65px; font-weight: 600; margin-bottom: 15px; }
+.personal-experience .fire-dashboard .fire-target { display: flex; flex-direction: column; justify-content: space-between; gap: 30px; padding: 30px; border: 0; border-radius: 0; background: var(--accent-soft); }
+.personal-experience .fire-dashboard .fire-target strong { font-size: clamp(34px, 4.4vw, 60px); font-weight: 540; letter-spacing: -1.5px; margin: 12px 0; }
+.personal-experience .fire-dashboard .fire-target dl { border-top: 1px solid var(--accent-border); padding-top: 20px; gap: 13px; }
+.personal-experience .fire-dashboard .fire-target dd { font-size: 21px; font-weight: 550; }
+.personal-experience .fire-position { min-width: 0; padding: 27px 28px; }
+.personal-experience .fire-position-heading h3 { color: var(--ink); font-size: 17px; font-weight: 550; }
+.personal-experience .fire-position-heading .fire-console-kicker { margin-bottom: 6px; color: var(--muted); }
+.personal-experience .fire-dashboard .fire-current-metrics { grid-template-columns: minmax(0, 1fr); gap: 15px; margin: 22px 0 0; }
+.personal-experience .fire-dashboard .fire-current-metrics > div + div { border-top: 1px solid var(--border); padding-top: 15px; }
+.personal-experience .fire-dashboard .fire-current-metrics strong { font-size: 26px; font-weight: 540; }
+.personal-experience .fire-dashboard > .fire-progress { height: 6px; border-radius: 0; }
+.personal-experience .fire-dashboard .fire-projection { margin: 0; padding: 25px 28px; background: var(--surface-muted); }
+.personal-experience .fire-projection-heading .fire-console-kicker { margin-bottom: 6px; color: var(--muted); }
+.personal-experience .fire-projection-heading h3 { font-size: 19px; color: var(--ink); margin-bottom: 7px; }
+.personal-experience .fire-dashboard .fire-projection .fire-metrics { gap: 24px; margin-top: 23px; }
+.personal-experience .fire-dashboard .fire-assumptions { border-top: 1px solid var(--border); padding-top: 16px; }
+.personal-experience .fire-dashboard .fire-next-step { background: var(--surface); border-left: 2px solid var(--accent); border-radius: 0 7px 7px 0; margin: 16px 0 0; }
+.personal-experience .fire-dashboard .fire-definitions { margin: 0; padding: 0 28px 18px; }
+.personal-experience .fire-dashboard .fire-definitions summary { display: flex; align-items: center; min-height: 48px; padding-top: 8px; }
+@media (max-width: 1100px) {
+  .personal-experience .fire-console-grid { grid-template-columns: minmax(0, 1fr); }
+  .personal-experience .fire-dashboard .fire-target { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 25px; }
+  .personal-experience .fire-dashboard .fire-target dl { border-top: 0; border-left: 1px solid var(--accent-border); padding: 0 0 0 22px; }
+  .personal-experience .fire-dashboard .fire-target strong { font-size: clamp(34px, 4vw, 48px); }
+  .personal-experience .fire-dashboard .fire-current-metrics,
+  .personal-experience .fire-dashboard .fire-projection .fire-metrics { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 18px; }
+  .personal-experience .fire-dashboard .fire-current-metrics > div,
+  .personal-experience .fire-dashboard .fire-current-metrics > div + div { border-left: 0; border-top: 1px solid var(--border); padding: 15px 0 0; }
+}
+@media (max-width: 600px) {
+  .personal-experience .fire-dashboard .fire-heading { padding: 20px; gap: 14px; }
+  .personal-experience .fire-dashboard .fire-heading h2 { font-size: 22px; }
+  .personal-experience .fire-dashboard .fire-heading > .text-link { width: 100%; justify-content: center; }
+  .personal-experience .fire-dashboard .fire-target { grid-template-columns: minmax(0, 1fr); padding: 23px 20px; gap: 20px; }
+  .personal-experience .fire-dashboard .fire-target strong { font-size: clamp(32px, 8.6vw, 45px); letter-spacing: -1px; }
+  .personal-experience .fire-dashboard .fire-target dl { border-left: 0; border-top: 1px solid var(--accent-border); padding: 18px 0 0; }
+  .personal-experience .fire-position { padding: 22px 20px; }
+  .personal-experience .fire-dashboard .fire-current-metrics,
+  .personal-experience .fire-dashboard .fire-projection .fire-metrics { grid-template-columns: minmax(0, 1fr); }
+  .personal-experience .fire-dashboard .fire-current-metrics > div + div { border-left: 0; border-top: 1px solid var(--border); padding: 15px 0 0; }
+  .personal-experience .fire-dashboard .fire-projection { padding: 23px 20px; }
+  .personal-experience .fire-dashboard .fire-definitions { padding-inline: 20px; }
+}
+@media (forced-colors: active) {
+  .personal-experience .fire-dashboard,
+  .personal-experience .fire-dashboard .fire-target dl { border-color: CanvasText; }
+  .personal-experience .fire-dashboard .fire-target,
+  .personal-experience .fire-dashboard .fire-projection { background: Canvas; }
+  .personal-experience .fire-dashboard .fire-console-kicker { color: LinkText; }
+}

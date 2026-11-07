@@ -1,0 +1,27 @@
+"use client";
+
+import { money, type Dataset } from "@/lib/finance";
+import type { IncomeSummary } from "@/lib/income";
+import { summarizeRsuTaxJournals, FIDELITY_RSU_WITHHOLDING_URL } from "@/lib/rsu-reconciliation";
+
+const dateLabel=(date:string)=>new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"});
+
+export default function RsuWithholding({data,summary,hidden}:{data:Dataset;summary:IncomeSummary;hidden:boolean}){
+ const trace=summarizeRsuTaxJournals(data,summary.start,summary.end);
+ const fmt=(value:number|null)=>value===null?"Unavailable":hidden?"••••":money(value,2);
+ const mask=(value:string)=>hidden?value.replace(/\$[\d,]+(?:\.\d+)?/g,"••••"):value;
+ const accountName=(id:string)=>{const a=data.accounts.find(a=>a.id===id);return a?`${a.institution} · ${a.name}${a.mask?` · •${a.mask}`:""}`:"Source account"};
+ if(!trace.journalCount)return null;
+ return <section className="panel rsu-tax-trace" id="rsu-tax-journals" aria-label="Recorded RSU tax journals">
+  <div className="panel-head"><div><div className="eyebrow">SETTLEMENT HISTORY · INFORMATION ONLY</div><h2>Recorded RSU tax journals</h2></div><span className="pill">{trace.journalCount} source journals</span></div>
+  <p className="panel-note">{fmt(trace.total)} across {trace.batches.length} dated batches. These are brokerage cash withdrawals explicitly labelled RSU federal income tax, Social Security, Medicare or WA MLI/FLI in the source. Their relationship to received-share quantities is not established. No automatic deduction or gross-up is applied.</p>
+  <div className="rsu-tax-batches">{trace.batches.map(batch=><article className="rsu-tax-batch" key={batch.id}>
+   <div className="rsu-tax-batch-heading"><div><strong>{dateLabel(batch.date)}</strong><small>{accountName(batch.accountId)}</small></div><b>{fmt(batch.total)} tax journals</b></div>
+   {batch.settlement?<div className="rsu-settlement-evidence"><strong>Historical sale-to-journal match · inferred</strong><p>Share sale on {dateLabel(batch.settlement.saleDate)}: {fmt(batch.settlement.proceeds)} = {fmt(batch.total)} tax journals + {fmt(batch.settlement.refundAmount)} RSU refund journal.</p><p>{hidden?"••••":batch.settlement.receiptShares} shares received on {dateLabel(batch.settlement.receiptDate)}; {hidden?"••••":batch.settlement.soldShares} shares in this sale. The same-account amounts reconcile exactly. The source does not explicitly link these particular rows or establish gross/net receipt basis.</p></div>:<p className="panel-note">No unique share-sale reconciliation is supported by the available records for this batch.</p>}
+   <details className="rsu-tax-originals"><summary>View {batch.entries.length} original tax journals{batch.settlement?" and settlement source IDs":""}</summary><ul>{batch.entries.map(entry=><li key={entry.id}><div><strong>{mask(entry.description)}</strong><b>{fmt(entry.amount)}</b></div><small>Cash withdrawal · {dateLabel(entry.date)}</small><code>{entry.id}</code></li>)}</ul>{batch.settlement&&<p className="rsu-source-ids">Receipt: <code>{batch.settlement.receiptIds.join(", ")}</code><br/>Sale: <code>{batch.settlement.saleIds.join(", ")}</code><br/>RSU refund journal: <code>{batch.settlement.refundId}</code></p>}</details>
+  </article>)}</div>
+  <div className="rsu-settled-basis"><strong>Separate settlement evidence</strong><p>These journal records show recorded settlement activity. They do not establish gross or after-tax receipt quantities and do not automatically alter receipt value or tracking surplus.</p><p>Received-share income remains shares actually credited × receipt-date price. Stock-sale proceeds remain separate from income.</p></div>
+  <a className="rsu-mechanism-link" href={FIDELITY_RSU_WITHHOLDING_URL} target="_blank" rel="noreferrer">Fidelity · How sell-to-cover withholding works ↗</a>
+  <style>{`.rsu-tax-trace{margin:22px 0}.rsu-tax-batches{display:grid;gap:14px;margin:20px 0}.rsu-tax-batch{border:1px solid var(--border);border-radius:9px;padding:18px;min-width:0}.rsu-tax-batch-heading{display:flex;justify-content:space-between;gap:16px;align-items:start}.rsu-tax-batch-heading>div{display:grid;gap:5px}.rsu-tax-batch-heading small{font-size:12px;color:var(--muted)}.rsu-tax-batch-heading b{font-size:14px;white-space:nowrap}.rsu-settlement-evidence{background:var(--surface-muted);border-radius:6px;padding:14px;margin:14px 0;font-size:13px;line-height:1.7}.rsu-settlement-evidence p{margin:7px 0 0}.rsu-tax-originals{font-size:13px;line-height:1.7}.rsu-tax-originals summary{cursor:pointer;color:var(--accent);font-weight:550}.rsu-tax-originals ul{list-style:none;padding:0;margin:14px 0}.rsu-tax-originals li{padding:12px 0;border-bottom:1px solid var(--border)}.rsu-tax-originals li>div{display:flex;justify-content:space-between;gap:16px}.rsu-tax-originals li strong{font-size:12px;font-weight:500;overflow-wrap:anywhere}.rsu-tax-originals li b{white-space:nowrap}.rsu-tax-originals li small{display:block;color:var(--muted)}.rsu-tax-originals code,.rsu-source-ids{font-size:11px;color:var(--muted);overflow-wrap:anywhere}.rsu-settled-basis{border-top:1px solid var(--border);padding-top:18px;font-size:13px;line-height:1.75}.rsu-settled-basis p{margin:8px 0}.rsu-mechanism-link{display:inline-block;margin-top:10px;font-size:12px;color:var(--accent)}@media(max-width:650px){.rsu-tax-batch-heading{flex-direction:column;gap:8px}.rsu-tax-originals li>div{flex-direction:column;gap:5px}}`}</style>
+ </section>;
+}

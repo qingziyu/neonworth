@@ -1,0 +1,4 @@
+.app-update-notice{flex-wrap:wrap;min-width:0}
+.app-update-notice>span{flex:1 1 240px;min-width:0;overflow-wrap:anywhere}
+.app-update-notice>svg{flex-shrink:0}
+.app-update-notice>.button{white-space:normal;min-height:36px;max-width:100%}

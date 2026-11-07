@@ -1,0 +1,8 @@
+{
+  "accounts": [{
+    "id": "example-checking", "name": "Example checking", "institution": "Example Bank",
+    "type": "depository", "subtype": "checking", "mask": "0000",
+    "balance": 7000, "netBalance": 7000, "balanceDate": "2026-01-05",
+    "balanceAgeKnown": true, "syncStatus": "manual"
+  }]
+}

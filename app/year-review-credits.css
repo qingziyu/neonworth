@@ -1,0 +1,22 @@
+/* Scoped layout for Year in Review inferred-refund and credit-group panels.
+   Structural only; root applies theme tokens separately. No amount-dependent geometry. */
+.review-standalone-refunds { display: grid; gap: 12px; margin-bottom: 16px; }
+.review-standalone-refund { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; }
+.review-standalone-refund-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.review-standalone-refund-head h3 { margin: 0; font-size: 1rem; }
+.review-standalone-refund-head span { color: var(--muted, inherit); font-size: 0.85rem; }
+.review-union-bridge { display: block; margin-top: 4px; }
+.review-inferred-evidence { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+.review-inferred-evidence > li { border-left: 3px solid var(--border); padding-left: 10px; }
+.review-inferred-pair { margin: 0; display: grid; gap: 2px; }
+.review-inferred-pair span, .review-inferred-amounts { color: var(--muted, inherit); font-size: 0.85rem; margin: 0; }
+.review-inferred-actions { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.review-credit-groups .review-credit-group { padding: 12px 0; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+.review-credit-group-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.review-credit-group-head h3 { margin: 0 0 2px; font-size: 1rem; }
+.review-credit-group-head p { margin: 0; }
+.review-credit-group-total { text-align: right; display: grid; white-space: nowrap; }
+@media (max-width: 640px) {
+  .review-credit-group-head { flex-direction: column; }
+  .review-credit-group-total { text-align: left; }
+}

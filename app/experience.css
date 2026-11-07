@@ -1,0 +1,102 @@
+/* Shared report composition. No transforms, animation or containment on the
+   application shell: dialogs retain the viewport as their containing block. */
+.personal-experience {
+  --workspace-gap: 24px;
+  --workspace-radius: 15px;
+  background: radial-gradient(ellipse at 94% 0, color-mix(in srgb, var(--violet) 4%, transparent), transparent 44%), var(--paper);
+}
+.personal-experience .sidebar { width: 224px; padding: 28px 16px 18px; }
+.personal-experience .workspace { margin-left: 224px; }
+.personal-experience main { max-width: 1520px; margin-inline: auto; padding: 32px 34px 54px; }
+.personal-experience .topbar { background: var(--paper); padding-inline: 34px; }
+.personal-experience .report-masthead { margin-bottom: 24px; }
+.personal-experience .workspace-fire-surface { grid-column: 1 / -1; min-width: 0; border: 1px solid var(--accent-border); border-radius: var(--workspace-radius); background: linear-gradient(135deg,var(--surface-raised),var(--surface)); }
+.personal-experience .workspace-fire-surface .workspace-fire-link { border: 0; background: transparent; width: 100%; }
+.personal-experience .sidebar nav a { min-height: 46px; border: 1px solid transparent; }
+.personal-experience .sidebar nav a.active { box-shadow: none; border-color: var(--accent-border); background: var(--accent-soft); }
+.personal-experience .sidebar nav a:hover > svg { transform: none; }
+.personal-experience .brand { margin-bottom: 32px; }
+.personal-experience .nav-secondary { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); }
+.personal-experience .workspace-pins { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; margin: -3px 0 23px; min-width: 0; }
+.personal-experience .workspace-pins > span { font: 10px ui-monospace, monospace; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-right: 5px; }
+.personal-experience .workspace-pins a { display: inline-flex; align-items: center; min-height: 36px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--ink); background: var(--surface); text-decoration: none; }
+.personal-experience .workspace-pins a:hover, .personal-experience .workspace-pins a[aria-current="page"] { color: var(--accent-strong); border-color: var(--accent-border); background: var(--accent-soft); }
+.personal-experience .experience-scope { padding: 15px 18px; margin-bottom: 25px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.personal-experience .experience-scope .global-period-bar { margin: 0; gap: 12px; flex-wrap: wrap; }
+.personal-experience .experience-scope .report-context { margin: 0; }
+.personal-experience .experience-scope .global-period-bar + .report-context { margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--border); }
+.personal-experience .experience-scope .period-dates { font-size: 11px; }
+.personal-experience .panel { border-radius: var(--workspace-radius); }
+.personal-experience .panel-head h2 { font-size: 19px; letter-spacing: -.35px; }
+.personal-experience .panel-head .eyebrow { margin-bottom: 7px; }
+.personal-experience .spending-decision { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(230px,1fr); align-items: center; gap: 24px; padding: 28px; margin-bottom: 24px; border: 1px solid var(--accent-border); border-radius: var(--workspace-radius); background: linear-gradient(120deg, var(--accent-soft), var(--surface) 70%); }
+.personal-experience .spending-decision .spending-summary-strip { display: flex; flex-wrap: wrap; gap: 22px 34px; padding: 0; margin: 0; border: 0; background: transparent; }
+.personal-experience .spending-decision .spending-summary-strip > div { min-width: 0; }
+.personal-experience .spending-decision .spending-summary-strip > div:first-child { flex-basis: 100%; }
+.personal-experience .spending-decision .spending-summary-strip strong { display: block; color: var(--ink); font-size: 24px; line-height: 1.25; margin-top: 8px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.personal-experience .spending-decision .spending-summary-strip > div:first-child strong { font-size: clamp(34px,4vw,52px); letter-spacing: -.05em; }
+.personal-experience .spending-decision .spending-summary-strip span { color: var(--muted); font-size: 12px; }
+.personal-experience .spending-decision .report-options { display: grid; gap: 17px; margin: 0; padding: 20px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface); }
+.personal-experience .spending-decision .report-options > span { font-size: 12px; line-height: 1.7; }
+.personal-experience .spending-decision .toggle { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; white-space: normal; }
+.personal-experience .spending-grid { gap: 24px; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); }
+.personal-experience .spending-grid > .panel { min-width: 0; }
+.personal-experience .budget-control-deck { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 14px 22px; align-items: center; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface); }
+.personal-experience .budget-control-deck .budget-plan-toolbar { display: contents; }
+.personal-experience .budget-control-deck .budget-save-state { align-self: center; min-width: 0; line-height: 1.7; }
+.personal-experience .budget-control-deck .budget-plan-toolbar > button { justify-self: end; min-height: 40px; }
+.personal-experience .budget-control-deck .budget-tabs { grid-column: 1/-1; margin: 0; padding-top: 14px; border-top: 1px solid var(--border); }
+.personal-experience .budget-hero { padding: 30px; border-radius: var(--workspace-radius); }
+.personal-experience .budget-headroom > strong { color: var(--ink); font-size: clamp(36px,4vw,54px); }
+.personal-experience .budget-next { border-radius: var(--workspace-radius); }
+.personal-experience .budget-funding { border-top: 2px solid var(--accent-border); }
+.personal-experience .ledger-summary { padding: 18px 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.personal-experience[data-density="compact"] { --workspace-gap: 16px; }
+.personal-experience[data-density="compact"] main { padding-top: 24px; }
+.personal-experience[data-density="compact"] :is(.workspace-card,.goal-card,.spending-grid > .panel,.budget-next,.budget-trend,.data-status) { padding: 18px; }
+.personal-experience[data-density="compact"] :is(td,th) { padding-block: 10px; }
+.personal-experience[data-density="compact"] .experience-scope { padding-block: 10px; }
+.personal-experience[data-density="compact"] .spending-decision { padding: 22px; }
+@media (max-width: 1100px) {
+  .personal-experience .sidebar { width: 204px; padding-inline: 12px; }
+  .personal-experience .workspace { margin-left: 204px; }
+  .personal-experience main { padding-inline: 24px; }
+  .personal-experience .topbar { padding-inline: 24px; }
+  .personal-experience .spending-decision { grid-template-columns: minmax(0,1fr); }
+  .personal-experience .spending-decision .report-options { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+}
+@media (max-width: 960px) {
+  .personal-experience .spending-grid { grid-template-columns: minmax(0,1fr); }
+  .personal-experience .workspace-current { display: none; }
+}
+@media (max-width: 800px) {
+  .personal-experience .sidebar { width: min(280px,calc(100vw - 38px)); }
+  .personal-experience .workspace { margin-left: 0; }
+  .personal-experience main { padding: 24px 20px 40px; }
+  .personal-experience .topbar { padding-inline: 20px; }
+}
+@media (max-width: 600px) {
+  .personal-experience { --workspace-gap: 16px; }
+  .personal-experience main { padding: 20px 14px 36px; }
+  .personal-experience .topbar { padding-inline: 14px; gap: 8px; }
+  .personal-experience .top-actions { gap: 5px; }
+  .personal-experience .workspace-name { display: none; }
+  .personal-experience .experience-scope { padding: 13px; margin-bottom: 18px; }
+  .personal-experience .experience-scope .global-period-bar { display: flex; flex-wrap: wrap; gap: 12px; }
+  .personal-experience .experience-scope .period-mode-control { flex: 1 1 100%; width: 100%; }
+  .personal-experience .experience-scope .period-mode-control button { flex: 1; padding-inline: 8px; }
+  .personal-experience .experience-scope .period-dates { order: 3; width: 100%; }
+  .personal-experience .experience-scope .month-control { margin-left: 0; width: 100%; justify-content: space-between; }
+  .personal-experience .experience-scope .month-control select { flex: 1; max-width: none; width: auto; text-align: center; font-size: 13px; }
+  .personal-experience .spending-decision { padding: 20px; gap: 20px; margin-bottom: 16px; }
+  .personal-experience .spending-decision .report-options { padding: 15px; }
+  .personal-experience .budget-control-deck { grid-template-columns: minmax(0,1fr); padding: 16px; }
+  .personal-experience .budget-control-deck .budget-plan-toolbar > button { justify-self: start; }
+  .personal-experience .budget-hero { padding: 22px; }
+  .personal-experience .workspace-pins { gap: 7px; }
+}
+@media (forced-colors: active) {
+  .personal-experience .spending-decision { background: Canvas; }
+}
+
+.personal-experience .workspace-pins a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

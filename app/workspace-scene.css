@@ -1,0 +1,83 @@
+/* Independently authored neon compositions. Only groups inside this artwork
+   receive native ambient motion; values, charts and the button stay still. */
+.personal-experience .workspace-scene {
+  position: absolute;
+  inset: 0 0 0 55%;
+  z-index: 0;
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  color: var(--muted);
+  font: inherit;
+  appearance: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  background: radial-gradient(ellipse at 64% 49%, color-mix(in srgb, var(--decor-ember) 9%, transparent), transparent 72%);
+}
+.personal-experience .workspace-scene:focus-visible {
+  outline: 2px solid var(--decor-cyan);
+  outline-offset: -4px;
+  border-color: var(--decor-cyan);
+}
+.personal-experience .workspace-scene[aria-disabled="true"] { cursor: default; }
+.personal-experience .workspace-scene__drawing {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%);
+  mask-image: linear-gradient(90deg, transparent, #000 12%);
+}
+.personal-experience .workspace-scene__hint { position: absolute; bottom: 9px; right: 11px; color: var(--muted); font-size: 10px; line-height: 1.4; letter-spacing: .04em; pointer-events: none; }
+.personal-experience .workspace-scene:focus-visible .workspace-scene__hint,
+.personal-experience .workspace-scene:hover:not([aria-disabled="true"]) .workspace-scene__hint { color: var(--ink); }
+.personal-experience .workspace-scene__description { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.personal-experience .workspace-scene__star-drift { transform-box: view-box; transform-origin: 282px 122px; }
+.personal-experience .workspace-scene__thread-drift { transform-box: view-box; transform-origin: 276px 122px; }
+.personal-experience .workspace-scene__stop-ember { stop-color: var(--decor-ember); }
+.personal-experience .workspace-scene__stop-magenta { stop-color: var(--decor-magenta); }
+.personal-experience .workspace-scene__stop-violet { stop-color: var(--violet); }
+.personal-experience .workspace-scene__stop-cyan { stop-color: var(--decor-cyan); }
+.personal-experience .workspace-scene__stop-ivory { stop-color: var(--ink); stop-opacity: .82; }
+.personal-experience .workspace-scene__stop-clear { stop-color: var(--decor-magenta); stop-opacity: 0; }
+.personal-experience .workspace-scene__geometry { stroke-linejoin: round; stroke-linecap: round; }
+.personal-experience .workspace-scene__haze { fill: none; stroke-width: 17; opacity: .13; }
+.personal-experience .workspace-scene__filament { fill: none; stroke-width: 3.1; opacity: .95; }
+.personal-experience .workspace-scene__filament--cool { stroke-width: 1.8; opacity: .8; }
+.personal-experience .workspace-scene__star--0 { fill: var(--decor-ember); }
+.personal-experience .workspace-scene__star--1 { fill: var(--decor-magenta); }
+.personal-experience .workspace-scene__star--2 { fill: var(--decor-cyan); }
+.personal-experience .workspace-scene__wave-back { opacity: .64; }
+.personal-experience .workspace-scene__wave-front { opacity: .91; }
+.personal-experience .workspace-scene__aurora > path:not(.workspace-scene__filament) { opacity: .81; }
+.personal-experience .workspace-scene__aurora > path.workspace-scene__aurora-back { opacity: .58; }
+.personal-experience .workspace-scene__thread { fill: none; stroke-width: 2.2; opacity: .88; }
+.personal-experience .workspace-scene__threads .workspace-scene__thread:nth-of-type(3n) { stroke-width: 1.4; opacity: .76; }
+.personal-experience .workspace-scene--terminal { --matrix-green: #4ee68b; --matrix-teal: #30baa3; --matrix-head: #dbffe9; background: radial-gradient(ellipse at 64% 49%, color-mix(in srgb, var(--matrix-green) 8%, transparent), transparent 72%); }
+.personal-experience .workspace-scene__glyph-column { fill: var(--matrix-green); stroke: none; }
+.personal-experience .workspace-scene__glyph-column--1 { fill: var(--matrix-teal); }
+.personal-experience .workspace-scene__glyph-column--2 { fill: var(--matrix-green); }
+.personal-experience .workspace-scene__terminal text { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Noto Sans Mono CJK JP", monospace; font-size: 18px; font-weight: 500; user-select: none; }
+.personal-experience .workspace-scene__terminal .workspace-scene__glyph-head { fill: var(--matrix-head); font-weight: 650; }
+.personal-experience .workspace-scene__terminal .workspace-scene__illumination { fill: var(--matrix-head); stroke: none; }
+.personal-experience .workspace-scene__illumination { fill: none; stroke: var(--ink); stroke-width: 3; opacity: 0; }
+.personal-experience .workspace-scene__illumination > ellipse { fill: var(--ink); stroke: none; }
+@media (max-width: 600px) {
+  .personal-experience .workspace-scene { inset: 0 0 auto 50%; height: 100px; background: none; }
+  .personal-experience .workspace-scene__drawing { min-width: 0; }
+  .personal-experience .workspace-scene__hint { bottom: 2px; right: 7px; font-size: 10px; }
+}
+@media (forced-colors: active) {
+  .personal-experience .workspace-scene { position: static; inset: auto; display: inline-flex; align-items: center; width: auto; height: auto; min-height: 36px; max-width: 100%; padding: 7px 11px; margin: 0 0 12px; background: Canvas; border-color: ButtonBorder; color: ButtonText; }
+  .personal-experience .workspace-scene__drawing { display: none; }
+  .personal-experience .workspace-scene__hint { position: static; color: ButtonText; font-size: 12px; }
+  .personal-experience .workspace-scene:focus-visible { outline-color: Highlight; border-color: Highlight; }
+}
+@media print {
+  .personal-experience .workspace-scene { display: none; }
+}

@@ -1,0 +1,45 @@
+name: Bug report
+description: Report a reproducible problem using synthetic data.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use invented records or the included demo. Do not attach real financial records, account identities, credentials, exports or database files. Hiding amounts does not anonymize a screenshot.
+
+        For security vulnerabilities, follow the [private reporting instructions](https://github.com/yaokaiy/neonworth/security/policy).
+  - type: input
+    id: version
+    attributes:
+      label: Version and environment
+      description: Commit or release, browser, and public demo, local app or deployed instance. Do not include a private hostname.
+      placeholder: "0.1.0-alpha.1, Chrome, local demo"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Synthetic reproduction
+      description: Steps to reproduce with the included demo or a small invented fixture.
+      placeholder: "1. Open Spending in the demo…"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include safe error text or a synthetic screenshot if useful.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This report and its attachments contain no real financial records or credentials.
+          required: true

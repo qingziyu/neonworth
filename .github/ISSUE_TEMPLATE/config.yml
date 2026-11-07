@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/yaokaiy/neonworth/security/policy
+    about: Follow the private reporting instructions; do not post sensitive details in a public issue.

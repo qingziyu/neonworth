@@ -1,0 +1,65 @@
+/*
+ * Static rules are the finished look. Entry motion lives in neon-entry.tsx and
+ * ends on these exact values. The wrapper is the only clipping element, and the
+ * parent header must provide isolation and position:relative.
+ */
+.personal-experience .neon-entry {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  overflow: clip;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.personal-experience .neon-entry__spill,
+.personal-experience .neon-entry__tube {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.personal-experience .neon-entry__spill {
+  height: min(82px, 100%);
+  background:
+    radial-gradient(ellipse 58% 100% at 22% 0,
+      color-mix(in srgb, var(--decor-cyan) 18%, transparent) 0%,
+      transparent 100%),
+    radial-gradient(ellipse 58% 100% at 82% 0,
+      color-mix(in srgb, var(--decor-magenta) 12%, transparent) 0%,
+      transparent 100%);
+}
+
+.personal-experience .neon-entry__tube {
+  height: 4px;
+  background-color: var(--structural-strong);
+  background-image: linear-gradient(
+    90deg,
+    var(--decor-cyan) 0%,
+    var(--structural-strong) 23%,
+    var(--violet) 46%,
+    var(--decor-magenta) 67%,
+    var(--decor-ember) 86%,
+    var(--accent-strong) 100%
+  );
+  box-shadow:
+    0 0 3px var(--structural-strong),
+    0 2px 12px color-mix(in srgb, var(--decor-cyan) 60%, transparent),
+    0 4px 22px color-mix(in srgb, var(--decor-magenta) 32%, transparent),
+    0 1px 6px color-mix(in srgb, var(--decor-ember) 50%, transparent);
+  transform-origin: 50% 50%;
+}
+
+@media (forced-colors: active), print {
+  .personal-experience .neon-entry {
+    display: none;
+  }
+}

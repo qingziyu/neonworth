@@ -1,0 +1,101 @@
+{
+  "name": "neonworth",
+  "version": "0.1.0-alpha.2",
+  "private": true,
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "install:ci": "node scripts/install-locked.mjs",
+    "test": "node scripts/test-all.mjs",
+    "typecheck": "tsc --noEmit",
+    "security:secrets": "node scripts/scan-secrets.mjs",
+    "security:audit": "npm exec --yes --package pnpm@11.25.0 -- pnpm audit --audit-level=high",
+    "dev": "node scripts/run-framework.mjs dev",
+    "build": "node scripts/run-framework.mjs build && node scripts/verify-build.mjs",
+    "start": "node --import ./scripts/runtime-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0 --var LOCAL_DEV:true",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "db:generate": "drizzle-kit generate",
+    "setup:local": "node scripts/setup-local.mjs",
+    "db:migrate:local": "node --import ./scripts/runtime-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local --config wrangler.jsonc --persist-to .wrangler/state",
+    "deploy": "node --import ./scripts/runtime-env.mjs ./node_modules/wrangler/bin/wrangler.js deploy --config dist/server/wrangler.json",
+    "demo:generate": "node --import ./scripts/test-support/register.mjs scripts/generate-demo.mjs",
+    "demo": "node scripts/seed-demo.mjs",
+    "demo:build": "vite build --config vite.demo.config.ts",
+    "demo:preview": "vite preview --config vite.demo.config.ts --host 127.0.0.1",
+    "import:validate": "node --import ./scripts/test-support/register.mjs scripts/validate-import.mjs",
+    "contracts:generate": "node --import ./scripts/test-support/register.mjs scripts/export-schema.mjs",
+    "contracts:check": "node --import ./scripts/test-support/register.mjs scripts/export-schema.mjs --check"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "@shadcn/react": "^0.3.1",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^4.4.0",
+    "drizzle-orm": "0.45.2",
+    "embla-carousel-react": "^8.6.0",
+    "input-otp": "^1.5.0",
+    "lucide-react": "^1.61.0",
+    "next": "16.4.2",
+    "next-themes": "^0.4.6",
+    "radix-ui": "^1.8.1",
+    "react": "19.3.1",
+    "react-day-picker": "^10.0.2",
+    "react-dom": "19.3.1",
+    "react-hook-form": "^7.90.0",
+    "react-resizable-panels": "^4.14.8",
+    "recharts": "^3.10.1",
+    "sonner": "^2.0.8",
+    "tailwind-merge": "3.6.0",
+    "vaul": "^1.1.2",
+    "zod": "4.6.7",
+    "jose": "6.2.14"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.64.0",
+    "@cloudflare/workers-types": "5.20261019.1",
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.1.2",
+    "@vitejs/plugin-rsc": "0.5.38",
+    "drizzle-kit": "0.31.11",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.4.2",
+    "json-rpc-2.0": "1.7.1",
+    "raw-body": "3.0.2",
+    "react-server-dom-webpack": "19.3.1",
+    "tailwindcss": "4.2.1",
+    "tw-animate-css": "^1.4.0",
+    "typescript": "5.9.3",
+    "vinext": "1.3.0",
+    "vite": "8.3.5",
+    "wrangler": "4.151.3"
+  },
+  "type": "module",
+  "overrides": {
+    "miniflare": {
+      "sharp": "0.35.5",
+      "undici": "7.30.1"
+    },
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.28.2"
+    },
+    "browserslist": "4.28.7",
+    "fflate": "0.7.5",
+    "fast-uri": "3.1.9"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "license": "MIT",
+  "description": "An open-source personal finance workspace for spending, budgets, net worth and financial goals.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yaokaiy/neonworth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yaokaiy/neonworth/issues"
+  }
+}

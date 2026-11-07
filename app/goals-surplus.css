@@ -1,0 +1,9 @@
+/* Scoped to the Goals two-measure tracking-surplus comparison. */
+.goal-surplus-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 10px 0 6px; }
+.goal-surplus-measure { display: grid; gap: 2px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--chart-grid, rgba(127, 127, 127, 0.25)); }
+.goal-surplus-measure.is-tracked { border-color: var(--accent); }
+.goal-surplus-measure dt { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.goal-surplus-measure dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.goal-surplus-measure.is-deficit dd { color: var(--warning); }
+.goal-surplus-measure small { font-size: 11px; color: var(--muted); }
+.goal-surplus-tracks { font-size: 10px; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: var(--accent); }

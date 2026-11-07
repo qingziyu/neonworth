@@ -1,0 +1,27 @@
+# Reproducible installation and explicit dependency build allowlist.
+minimumReleaseAge: 10080
+minimumReleaseAgeIgnoreMissingTime: false
+trustLockfile: false
+strictDepBuilds: true
+allowBuilds:
+  esbuild: true
+  fsevents: true
+  sharp: true
+  unrs-resolver: true
+  workerd: true
+storeDir: .runtime/pnpm-store
+cacheDir: .runtime/pnpm-store/policy-cache
+enableGlobalVirtualStore: false
+# Reuse store files with clones or hardlinks before falling back to copies.
+packageImportMethod: auto
+# The explicit installer owns dependency setup, including restored workspaces.
+verifyDepsBeforeRun: false
+optimisticRepeatInstall: false
+overrides:
+  miniflare>sharp: 0.35.5
+  # Explicit patched transitives until their upstream manifests catch up.
+  miniflare>undici: 7.30.1
+  '@esbuild-kit/core-utils>esbuild': 0.28.2
+  browserslist: 4.28.7
+  fflate: 0.7.5
+  fast-uri: 3.1.9
