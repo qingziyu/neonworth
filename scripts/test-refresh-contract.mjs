@@ -179,8 +179,8 @@ try {
   assert.equal((await store.readState()).refresh.lastRun.status, 'succeeded');
   seed(); begin = await refresh.beginRefresh(); failLast = true;
   await assert.rejects(refresh.commitRefresh(begin.runId, bundle), error=>error.code==='STORAGE_UNAVAILABLE'&&error.status===503&&/could not confirm/.test(error.message));
-  state = await store.readState(); assert.deepEqual(state.dataset, base); assert.deepEqual(state.overrides, corrections); assert.equal(state.refresh.lastRun.status, 'failed'); assert.equal(logs(), 0);
-  assert.match(state.refresh.lastRun.error,/could not confirm.*Reload saved data/);assert.doesNotMatch(state.refresh.lastRun.error,/D1_ERROR|private|SQL|values/,'Saved refresh status must not retain raw storage error details');
+  state = await store.readState(); assert.deepEqual(state.dataset, base); assert.deepEqual(state.overrides, corrections); assert.equal(state.refresh.lastRun.status, 'running','An unconfirmed storage write is left intact for later readback'); assert.equal(logs(), 0);
+  assert.equal(state.refresh.lastRun.error,undefined,'Uncertain storage must not fabricate a failed run or persist raw storage error details');
   seed(); begin = await refresh.beginRefresh();
   const incomplete = structuredClone(bundle); incomplete.bank[0].result.has_more = true; incomplete.bank[0].result.next_cursor = 'missing-page';
   await assert.rejects(refresh.commitRefresh(begin.runId, incomplete), /pagination/);

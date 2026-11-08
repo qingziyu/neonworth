@@ -54,11 +54,12 @@ assert.throws(()=>collectionPlan(empty,undefined,now),/earliest available/);
 assert.deepEqual(unwrapResult({content:[{type:'text',text:'{"value":1}'}]}),{value:1});
 assert.throws(()=>unwrapResult({isError:true,content:[{type:'text',text:'private error'}]}),/did not confirm/);
 assert.throws(()=>unwrapResult({isError:true,content:[{type:'text',text:JSON.stringify({code:'STORAGE_UNAVAILABLE',error:'Synthetic uncertain storage response'})}]}),error=>error.code==='tool_outcome_uncertain','An explicit storage uncertainty response is not definitive mutation rejection');
+assert.throws(()=>unwrapResult({isError:true,content:[{type:'text',text:JSON.stringify({outcome:'rejected',error:'Synthetic validation rejection'})}]}),error=>error.code==='tool_rejected');
 
 const db=new DatabaseSync(':memory:');db.exec('CREATE TABLE finance_records(key TEXT PRIMARY KEY NOT NULL,value TEXT NOT NULL,updated_at TEXT NOT NULL); CREATE TABLE finance_sync_log(id INTEGER PRIMARY KEY AUTOINCREMENT,imported_at TEXT NOT NULL,as_of TEXT NOT NULL,transaction_count INTEGER NOT NULL,account_count INTEGER NOT NULL)');
-let rollback=false;
+let rollback=false,deferBatch=false,deferredBatch=null;
 const statement=(sql,args=[])=>({sql,args,bind(...values){return statement(sql,values)},async first(){return db.prepare(sql).get(...args)||null},async all(){return {results:db.prepare(sql).all(...args)}}});
-const binding={prepare:sql=>statement(sql),async batch(ops){db.exec('BEGIN');try{const out=ops.map((op,i)=>{if(rollback&&i===ops.length-1)throw new Error('synthetic rollback');return {success:true,meta:db.prepare(op.sql).run(...op.args)}});db.exec('COMMIT');return out}catch(error){db.exec('ROLLBACK');throw error}finally{rollback=false}}};
+const binding={prepare:sql=>statement(sql),async batch(ops){if(deferBatch){deferBatch=false;deferredBatch=ops;throw new Error('D1_ERROR: Network connection lost.');}db.exec('BEGIN');try{const out=ops.map((op,i)=>{if(rollback&&i===ops.length-1)throw new Error('synthetic rollback');return {success:true,meta:db.prepare(op.sql).run(...op.args)}});db.exec('COMMIT');return out}catch(error){db.exec('ROLLBACK');throw error}finally{rollback=false}}};
 const temp=await mkdtemp('/private/tmp/neonworth-finance-workflow-');
 try{
  globalThis.__neonworthWorkflowEnv={DB:binding};
@@ -101,7 +102,7 @@ try{
  const refreshed=await execute();assert.equal(refreshed.evidence.verified,true);assert.equal(commitCalls,1,'A lost acknowledgment is read back, not replayed');assertIndependentPreserved(before,refreshed.checkpoint);
  const twice=await execute();assert.equal(twice.evidence.verified,true);assert.equal(twice.checkpoint.saved.refresh.lastRun.report.newTransactions,0);assert.equal(twice.checkpoint.saved.refresh.lastRun.report.unchangedSource,true);
  const delayedBefore=await readCheckpoint(io);let delayedCommit,delayedFailures=0;
- const delayedIO={...io,async call(name,args){if(name==='commit_finance_refresh'){delayedCommit=structuredClone(args);return {isError:true,content:[{type:'text',text:JSON.stringify({code:'STORAGE_UNAVAILABLE',error:'Synthetic acknowledgment lost while the request remains queued'})}]};}if(name==='fail_finance_refresh')delayedFailures++;return io.call(name,args);}};
+ const delayedIO={...io,async call(name,args){if(name==='commit_finance_refresh'){delayedCommit=structuredClone(args);return {isError:true,content:[{type:'text',text:'Synthetic unclassified gateway error while the original request remains queued'}]};}if(name==='fail_finance_refresh')delayedFailures++;return io.call(name,args);}};
  await assert.rejects(execute({io:delayedIO}),error=>error.code==='write_unverified');
  const inFlight=await readCheckpoint(io);assert.equal(inFlight.saved.refresh.lastRun.status,'running');assert.equal(delayedFailures,0,'Uncertain in-flight writes must never be changed to failed');
  const delayedReceipt=unwrapResult(await io.call('commit_finance_refresh',delayedCommit)),delayedAfter=await readCheckpoint(io),delayedStatus=unwrapResult(await io.call('get_dashboard_status',{})),delayedSummaries={};
@@ -111,6 +112,14 @@ try{
  let committedBeforeReadError=false,postCommitFailures=0;
  const unreadableIO={...io,async call(name,args){if(name==='get_saved_dataset'&&committedBeforeReadError)throw new Error('Synthetic read transport unavailable');if(name==='fail_finance_refresh')postCommitFailures++;const value=await io.call(name,args);if(name==='commit_finance_refresh')committedBeforeReadError=true;return value;}};
  await assert.rejects(execute({io:unreadableIO}),error=>error.code==='write_unverified');assert.equal(postCommitFailures,0);assert.equal((await readCheckpoint(io)).saved.refresh.lastRun.status,'succeeded','A failed verification transport cannot fail an accepted write');
+ const serverBefore=await readCheckpoint(io),serverProof=unwrapResult(await io.call('get_workflow_checkpoint',{})),commitsBeforeDeferred=commitCalls;let serverOutcome;
+ const serverUncertainIO={...io,async call(name,args){const response=await io.call(name,args);if(name==='commit_finance_refresh')serverOutcome=JSON.parse(response.content[0].text).outcome;return response;}};
+ await assert.rejects(execute({io:serverUncertainIO,collect:async()=>{deferBatch=true;return structuredClone(bundle);}}),error=>error.code==='write_unverified');
+ const serverInFlight=await readCheckpoint(io);assert.equal(serverOutcome,'unconfirmed');assert.equal(serverInFlight.saved.refresh.lastRun.status,'running');assert.deepEqual(serverInFlight.saved.dataset,serverBefore.saved.dataset);assert.equal(commitCalls,commitsBeforeDeferred+1);
+ // Complete the original queued storage batch, without a second application
+ // mutation. Its unchanged-status guard would fail if catch closed the run.
+ assert.ok(deferredBatch);await binding.batch(deferredBatch);deferredBatch=null;
+ const serverRecovered=unwrapResult(await io.call('verify_finance_refresh',{runId:serverInFlight.saved.refresh.lastRun.id,expectedIndependentHash:serverProof.independentHash}));assert.equal(serverRecovered.verified,true);assert.equal(commitCalls,commitsBeforeDeferred+1,'Later storage success is verified without replaying the source mutation');
  const countBefore=db.prepare('SELECT count(*) n FROM finance_sync_log').get().n;
  await assert.rejects(execute({collect:async()=>{const bad=structuredClone(bundle);bad.bank[0].result.has_more=true;bad.bank[0].result.next_cursor='missing';return bad;}}),/failed validation/);
  assert.equal(db.prepare('SELECT count(*) n FROM finance_sync_log').get().n,countBefore);
@@ -124,9 +133,10 @@ try{
  assert.equal((await readCheckpoint(io)).saved.dataset.transactions.find(t=>t.id==='purchase').amount,21,'Refresh cannot overwrite a concurrent source update');
  const preRollback=await readCheckpoint(io);
  // Force failure only during commit, after the begin status write.
- await assert.rejects(execute({collect:async()=>{const current=structuredClone(bundle);current.bank[0].result.items.find(row=>row.transaction_id==='purchase').amount=21;rollback=true;return current;}}));
+ await assert.rejects(execute({collect:async()=>{const current=structuredClone(bundle);current.bank[0].result.items.find(row=>row.transaction_id==='purchase').amount=21;rollback=true;return current;}}),error=>error.code==='write_unverified');
  assert.deepEqual((await readCheckpoint(io)).saved.dataset,preRollback.saved.dataset);
- assert.equal((await readCheckpoint(io)).saved.refresh.lastRun.status,'failed');
+ assert.equal((await readCheckpoint(io)).saved.refresh.lastRun.status,'running','Unconfirmed storage does not cause either client or server to fail the owned run');
+ mock.timers.tick(2*60*60*1000+1); // A fresh attempt is permitted only after the normal lease timeout.
  let malformedCollections=0;
  await assert.rejects(execute({collect:async()=>{malformedCollections++;const invalid=structuredClone(bundle);invalid.accounts.institutions[0].accounts.push({account_id:'malformed-new'});return invalid;}}),error=>error.code==='source_validation');
  assert.equal(malformedCollections,1,'Malformed new-account records fail validation before requesting a backfill');

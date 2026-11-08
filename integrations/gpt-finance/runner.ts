@@ -59,10 +59,10 @@ export async function runFinanceWorkflow(options:WorkflowOptions):Promise<{evide
   writeState='uncertain';
   try{
    receipt=await call(io,plan.mode==='initial'?'import_finance_dataset':'commit_finance_refresh',prepared.payload);
-   if(receipt?.success===false)throw new WorkflowError('tool_failure','The destination rejected the write.');
+   if(receipt?.success===false||receipt?.outcome==='rejected')throw new WorkflowError('tool_rejected','The destination rejected the write.');
    if(receipt?.success===true)writeState='accepted';else receipt=null;
   }catch(error){
-   if(error instanceof WorkflowError&&error.code==='tool_failure'){writeState='rejected';throw new WorkflowError('write_rejected','The destination explicitly rejected the write. No successful update is claimed; inspect the saved state before another attempt.');}
+   if(error instanceof WorkflowError&&error.code==='tool_rejected'){writeState='rejected';throw new WorkflowError('write_rejected','The destination explicitly rejected the write. No successful update is claimed; inspect the saved state before another attempt.');}
    // Transport errors and malformed acknowledgments do not prove rejection.
    // Read back without replaying or failing a possibly in-flight commit.
    receipt=null;

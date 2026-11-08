@@ -145,8 +145,9 @@ export async function POST(request:Request) {
       const failure=storageFailure(error,mutation?'record_write':'storage');
       // Tool errors keep the MCP envelope and HTTP 200. A transport-level retry
       // must never replay an unconfirmed mutation automatically.
-      return json({jsonrpc:'2.0',id,result:{content:[{type:'text',text:JSON.stringify({error:storageErrorMessage(failure,mutation),code:failure.code,reference:failure.reference})}],isError:true}});
+      return json({jsonrpc:'2.0',id,result:{content:[{type:'text',text:JSON.stringify({error:storageErrorMessage(failure,mutation),code:failure.code,reference:failure.reference,...(mutation?{outcome:'unconfirmed'}:{})})}],isError:true}});
     }
-    return json({jsonrpc:'2.0',id,result:{content:[{type:'text',text:error instanceof Error?error.message:'Request failed.'}],isError:true}});
+    const message=error instanceof Error?error.message:'Request failed.';
+    return json({jsonrpc:'2.0',id,result:{content:[{type:'text',text:mutation?JSON.stringify({error:message,outcome:'rejected'}):message}],isError:true}});
   }
 }

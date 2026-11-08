@@ -25,7 +25,8 @@ export function unwrapResult(value:unknown):any {
  if(value.isError===true||value.error){
   let detail=value.structuredContent??value;
   if(!detail.code&&Array.isArray(value.content)&&value.content.length===1&&value.content[0]?.type==='text'){try{detail=JSON.parse(value.content[0].text);}catch{/* An unstructured error is not a storage outcome code. */}}
-  if(detail?.code==='STORAGE_UNAVAILABLE'||detail?.code==='STORAGE_FAILURE')fail('tool_outcome_uncertain','Storage could not confirm the operation. Inspect durable saved state without replaying a mutation.');
+  if(detail?.outcome==='unconfirmed'||detail?.code==='STORAGE_UNAVAILABLE'||detail?.code==='STORAGE_FAILURE')fail('tool_outcome_uncertain','Storage could not confirm the operation. Inspect durable saved state without replaying a mutation.');
+  if(detail?.outcome==='rejected'||detail?.success===false)fail('tool_rejected','The destination explicitly rejected the operation.');
   fail('tool_failure','The tool did not confirm a successful result.');
  }
  if('structuredContent' in value)return unwrapResult(value.structuredContent);

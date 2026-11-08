@@ -55,9 +55,9 @@ export class SitesUpgradeConflict extends Error {
   constructor(paths) { super('Source conflicts require a reviewed manual merge; no files changed.'); this.paths = paths; }
 }
 
-/** File-level three-way upgrade. The fault hook is for executed rollback tests;
- * it has no CLI flag. No source-control, database, migration or hosting mutation. */
-export function upgradeSitesSource(source, instance, { beforeWrite } = {}) {
+/** File-level three-way upgrade. Fault hooks are for executed rollback tests;
+ * they have no CLI flags. No source-control, database, migration or hosting mutation. */
+export function upgradeSitesSource(source, instance, { beforeWrite, beforeRename } = {}) {
   if (!isAbsolute(instance)) throw new Error('Choose an absolute private-instance directory.');
   source = realpathSync(resolve(source));
   if (lstatSync(instance).isSymbolicLink()) throw new Error('The instance root must not be a symbolic link.');
@@ -92,27 +92,35 @@ export function upgradeSitesSource(source, instance, { beforeWrite } = {}) {
   for (const change of plan) if (!equal(localFile(instance, change.path), change.before)) throw new Error('Instance source changed during upgrade preflight.');
 
   const applied = [], createdDirectories = [];
-  function atomic(path, bytes, mode) {
+  function atomic(path, bytes, mode, injectFault = false) {
     const destination = safePath(instance, path), parent = dirname(destination), missing = [];
     for (let directory = parent; !existsSync(directory); directory = dirname(directory)) missing.push(directory);
     for (const directory of missing.reverse()) { mkdirSync(directory); createdDirectories.push(directory); }
     const temporary = mkdtempSync(join(parent, '.neonworth-upgrade-'));
-    try { const file = join(temporary, 'file'); writeFileSync(file, bytes, { mode }); renameSync(file, destination); }
+    try {
+      const file = join(temporary, 'file'); writeFileSync(file, bytes, { mode });
+      if (injectFault) beforeRename?.(path);
+      renameSync(file, destination);
+    }
     finally { rmSync(temporary, { recursive: true, force: true }); }
   }
   try {
     for (const [index, change] of plan.entries()) {
       beforeWrite?.(index, change.path);
       applied.push(change);
-      if (change.after) atomic(change.path, change.after.bytes, change.after.mode); else unlinkSync(safePath(instance, change.path));
+      if (change.after) atomic(change.path, change.after.bytes, change.after.mode, true); else unlinkSync(safePath(instance, change.path));
     }
     beforeWrite?.(plan.length, '.openai/template.json');
-    atomic('.openai/template.json', Buffer.from(JSON.stringify({ version: 1, upstreamRevision: nextRevision }, null, 2) + '\n'), prior.mode);
+    atomic('.openai/template.json', Buffer.from(JSON.stringify({ version: 1, upstreamRevision: nextRevision }, null, 2) + '\n'), prior.mode, true);
   } catch {
     let restored = true;
     for (const change of applied.reverse()) try {
       if (change.before) atomic(change.path, change.before.bytes, change.before.mode);
-      else unlinkSync(safePath(instance, change.path));
+      else try { unlinkSync(safePath(instance, change.path)); } catch (error) {
+        // A failed create may never have installed the new file. Its absence
+        // already matches the pre-upgrade state; other failures still matter.
+        if (error.code !== 'ENOENT') throw error;
+      }
     } catch { restored = false; }
     try { atomic('.openai/template.json', prior.bytes, prior.mode); } catch { restored = false; }
     for (const directory of createdDirectories.reverse()) try { rmdirSync(directory); } catch { /* Keep nonempty or preexisting parents. */ }

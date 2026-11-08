@@ -4,7 +4,7 @@ import { buildRefresh, refreshWindow, type RefreshState, type RefreshBundle, typ
 import { summarizePeriod } from './finance';
 import { deriveDataset } from './classification';
 import { sameDatasetContent } from './dataset-storage';
-import { isStorageError, storageErrorMessage, storageFailure, StorageFailure } from './storage-errors';
+import { isStorageError, storageFailure, StorageFailure } from './storage-errors';
 import { assertCredentialFree } from './credential-boundary';
 import { budgetPlanSchema } from './budget';
 import { planningSchema, PLANNING_RECORD_KEY } from './planning';
@@ -102,7 +102,11 @@ export async function commitRefresh(runId:string,bundle:RefreshBundle){
   const confirmed=await current().catch(()=>null);
   if(confirmed?.lastRun?.id===runId&&confirmed.lastRun.status==='succeeded')return {success:true,unchanged:true,runId,report:confirmed.lastRun.report};
   const safeError=isStorageError(error)?storageFailure(error,'snapshot_write'):error;
-  await failRefresh(runId,safeError instanceof StorageFailure?storageErrorMessage(safeError,true):safeError instanceof Error?safeError.message:'Update failed.').catch(()=>{});throw safeError;
+  // An unconfirmed storage write may still publish. Changing its running lease
+  // here would make that original atomic batch fail its own status guard.
+  // Leave it intact for durable readback or the normal stale-run timeout.
+  if(!(safeError instanceof StorageFailure))await failRefresh(runId,safeError instanceof Error?safeError.message:'Update failed.').catch(()=>{});
+  throw safeError;
  }
 }
 export async function configureRefreshSchedule(input:unknown){
