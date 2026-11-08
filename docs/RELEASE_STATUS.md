@@ -20,7 +20,7 @@ The Finance bootstrap contract prepared an invented 3-account, 130-transaction f
 
 A complete hosted synthetic refresh passed: its owned run read back as succeeded, the persisted dataset matched the atomically saved source hash, month/YTD/year summaries reconciled, and transaction corrections/settings/budget/FIRE records stayed unchanged. This used invented source envelopes through the deployed website APIs. Native MCP and live Finance access remain separate gates below.
 
-Hosted source-upgrade preservation is still pending its before/after readback.
+The three-way source upgrader and native republishing also passed on the populated instance. Before/after hashes matched for the dataset, corrections, settings, retirement/review annotations, refresh state, budget and planning. This acceptance publication changed documentation/provenance and introduced no schema migration; code-change/conflict/rollback behavior is separately exercised by filesystem/Git regression fixtures. No source import or refresh ran during publication.
 
 ## Separate gates
 
