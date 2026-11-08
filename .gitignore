@@ -37,7 +37,10 @@ yarn-error.log*
 /.sites-runtime/
 
 # Workspace scaffolding and publication archives
-/.agents/
+/.agents/*
+!/.agents/plugins/
+/.agents/plugins/*
+!/.agents/plugins/marketplace.json
 /.codex/
 /outputs/
 /work/
@@ -52,3 +55,6 @@ __pycache__/
 # Instance identity and local runtime state
 /wrangler.jsonc
 /.runtime/
+
+# Private Sites instance identity is generated only in deployment copies.
+/.openai/

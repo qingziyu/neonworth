@@ -1,0 +1,4 @@
+interface:
+  display_name: "Neonworth workflows"
+  short_description: "Create and maintain a private finance workspace"
+  default_prompt: "Use $neonworth-workflows to create or update my private Neonworth workspace using my authorized financial source."

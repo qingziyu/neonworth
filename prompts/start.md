@@ -1,0 +1,5 @@
+Create a private Neonworth finance dashboard for me using https://github.com/yaokaiy/neonworth and its `skills/neonworth-workflows/SKILL.md` create-or-resume workflow. Use my already-connected, authorized financial source; do not ask me to paste bank credentials or exports into this chat.
+
+Check for an existing instance or interrupted creation before creating another. Ask for the first history date and reporting timezone if they are required and not established. Keep the Site owner-private, preserve source evidence, reconcile supported transfers/refunds and leave uncertain purposes visible. Do not invent balances, prices, coverage or personal budget/FIRE targets.
+
+Complete the supported build, publication, initial population and saved-state readback. Return the Site link and distinguish what was deployed from what financial data was verified. Configure a recurring update only if I request a cadence and timezone. If a needed tool is unavailable, identify that specific blocker without pretending setup succeeded.

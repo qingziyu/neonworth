@@ -5,6 +5,7 @@ Neonworth's original application code is MIT licensed. Dependencies retain their
 - Space Grotesk: SIL Open Font License 1.1. The unmodified font, attribution and license are in `public/fonts/`.
 - Copied shadcn/ui component implementations: MIT; see `vendor/shadcn-ui.LICENSE`.
 - Vendored shadcn Tailwind styles: preserve `vendor/shadcn-tailwind-4.13.0.LICENSE.md`.
+- Sites Vite integration: MIT-licensed upstream starter implementation, with its retained license in `profiles/sites/sites-vite-plugin.LICENSE`.
 - React, Radix UI, Recharts, Lucide and other installed dependencies retain the licenses included in their respective packages.
 
 Neonworth's binary rain, report illustrations and neon treatments are local CSS, SVG and canvas implementations. They do not bundle paid React Bits Pro component source or require a commercial animation subscription.

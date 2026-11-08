@@ -1,5 +1,7 @@
 # Run your own Neonworth
 
+For the managed ChatGPT installation path with already-authorized GPT Finance data, use [the Sites profile](../profiles/sites/README.md) and [setup prompt](../prompts/start.md). This page covers the independently operated Cloudflare deployment.
+
 Neonworth is a single-owner application using Vinext, Vite, Cloudflare Workers and D1. It does not require ChatGPT Sites, a connector grant, or access to the original application's infrastructure. Each installation needs its own database and configuration. The application stores imported snapshots; it does not connect to banks or brokerages.
 
 ## Local development

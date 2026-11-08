@@ -1,6 +1,6 @@
 {
   "name": "neonworth",
-  "version": "0.1.0-alpha.2",
+  "version": "0.2.0-alpha.1",
   "private": true,
   "engines": {
     "node": ">=22.18.0"
@@ -12,7 +12,7 @@
     "security:secrets": "node scripts/scan-secrets.mjs",
     "security:audit": "npm exec --yes --package pnpm@11.25.0 -- pnpm audit --audit-level=high",
     "dev": "node scripts/run-framework.mjs dev",
-    "build": "node scripts/run-framework.mjs build && node scripts/verify-build.mjs",
+    "build": "node scripts/build-profile.mjs",
     "start": "node --import ./scripts/runtime-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0 --var LOCAL_DEV:true",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
@@ -25,7 +25,14 @@
     "demo:preview": "vite preview --config vite.demo.config.ts --host 127.0.0.1",
     "import:validate": "node --import ./scripts/test-support/register.mjs scripts/validate-import.mjs",
     "contracts:generate": "node --import ./scripts/test-support/register.mjs scripts/export-schema.mjs",
-    "contracts:check": "node --import ./scripts/test-support/register.mjs scripts/export-schema.mjs --check"
+    "contracts:check": "node --import ./scripts/test-support/register.mjs scripts/export-schema.mjs --check",
+    "sites:export": "node scripts/export-sites.mjs",
+    "sites:setup": "node scripts/setup-sites.mjs",
+    "sites:build": "node scripts/run-sites.mjs build && node scripts/verify-sites-build.mjs",
+    "sites:dev": "node scripts/run-sites.mjs dev",
+    "sites:migrate:local": "node --import ./scripts/runtime-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local --config profiles/sites/wrangler.jsonc --persist-to .wrangler/sites-state",
+    "sites:check": "node scripts/check-sites-build.mjs",
+    "sites:upgrade": "node scripts/upgrade-sites.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

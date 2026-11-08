@@ -14,9 +14,17 @@ flowchart LR
 
 ## Runtime and authentication
 
-React routes use Vinext, Vite and Cloudflare Workers. Cloudflare Access JWT validation runs before the application handler for UI, API and MCP requests. The configured issuer, audience and single owner must match; configured failures do not fall back to anonymous access. A tightly scoped development exception requires an explicit local flag and an HTTP loopback request. Production builds disable that flag.
+React routes use Vinext, Vite and Cloudflare Workers. The default standalone profile verifies Cloudflare Access JWTs before the application handler for UI, API and MCP requests. The configured issuer, audience and single owner must match; configured failures do not fall back to another profile or anonymous access. A tightly scoped development exception requires an explicit local flag and an HTTP loopback request. Production builds disable that flag.
 
-Only storage bindings and lifecycle helpers reach the application handler. Provider credentials and connector capabilities are not forwarded. Write endpoints also enforce same-origin behavior. The MCP endpoint is protected by the same owner boundary; an external client must have compatible Access authentication. No automatic scheduler is bundled.
+The separate [Sites profile](../profiles/sites/README.md) uses the supported owner-private Sites Dispatch authentication boundary. Dispatch validates browser/MCP access and consumes the Site-scoped shared-updater bearer; a valid service call need not include a visitor identity. This entry point is supported only behind confirmed private Sites access, never as a raw public Worker. Profile selection is explicit at build time. Both entries strip authentication material and discard source capabilities before application handling.
+
+Only storage bindings and lifecycle helpers reach the application handler. Provider credentials and connector capabilities are not forwarded. Write endpoints also enforce same-origin behavior. The MCP endpoint is protected by its profile's owner boundary; external callers need the corresponding supported authentication. The workflow package can configure a requested native Sites-linked automation after verifying unattended access; it contains no scheduler service or background bank connection of its own.
+
+## GPT Finance workflow boundary
+
+The user's GPT Finance connection is already authorized. The collecting agent discovers actual source tools and schemas, follows all pagination and independent inflow checks, then uses the deterministic [Finance harness](../integrations/gpt-finance/README.md). Its default path prepares/verifies structured private artifacts while the host performs native calls; its injectable runner is an optional library, not a new credential-bearing service.
+
+First import uses a strict `initialOnly:true` empty-destination guard and atomic source revision check. Ongoing refreshes retain the existing owned-run protocol, source evidence and independent corrections. Successful writes require persisted source, counts, run and month/YTD/year summary readback. A lost response triggers verification, not automatic replay. The prompts/skill/plugin route installation, refresh, upgrade and recovery without changing these domain rules.
 
 ## Data ownership
 

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "neonworth-gpt-finance",
+  "sourceAccess": "Already connected and authorized native GPT Finance read capabilities",
+  "toolMapping": "Discover the actual tool names and input schemas in the current host. These roles are not callable tool names.",
+  "roles": {
+    "accounts": "Complete linked-account read (get_linked_accounts in the existing Finance contract)",
+    "bank": "bank_transactions for the exact window, all accounts, transfers included, no pending filter",
+    "inflows": "Independent bank_transactions query for the same window, amount less than zero, pending false, transfers included",
+    "investments": "All investment_transactions for the exact window and all accounts",
+    "recurring": "All recurring_transactions without filters",
+    "netWorth": "ledger_net_worth_source data with lookback_days 365"
+  },
+  "pagination": {"limit": 50, "bankAndInvestmentOrder": "date descending", "firstCursor": null, "continue": "Use each exact returned next_cursor until has_more is false", "preserve": "Actual rows and coverage, unchanged"},
+  "destinationContract": {"importVersion": 1, "refreshVersion": 1, "importEndpoint": "/api/import", "refreshEndpoint": "/api/refresh", "maximumRequestBytes": 8000000},
+  "nonGoals": ["Bank connection setup", "Provider writes", "Credentials in records or files", "Inferred source completeness", "Inferred RSU prices", "Automatic schedule creation", "Application deployment during refresh"]
+}

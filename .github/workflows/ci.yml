@@ -44,6 +44,8 @@ jobs:
         run: npm run typecheck
       - name: Build Worker and assets
         run: npm run build
+      - name: Build isolated synthetic Sites profile
+        run: npm run sites:check
       - name: Build synthetic public demo
         run: npm run demo:build
         env:

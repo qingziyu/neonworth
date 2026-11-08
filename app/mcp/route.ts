@@ -9,8 +9,9 @@ import { deriveDataset } from '@/lib/classification';
 import { summarizeRecurring } from '@/lib/recurring';
 import { summarizeReview } from '@/lib/review';
 import { summarizeCardFees } from '@/lib/card-reference';
-import { beginRefresh,commitRefresh,failRefresh,getRefreshContract,configureRefreshSchedule,safeRefreshFailureReason } from '@/lib/refresh';
+import { beginRefresh,commitRefresh,failRefresh,getRefreshContract,getWorkflowCheckpoint,verifyFinanceRefresh,configureRefreshSchedule,safeRefreshFailureReason } from '@/lib/refresh';
 import { isStorageError, storageErrorMessage, storageFailure } from '@/lib/storage-errors';
+import { MAX_REQUEST_BYTES } from '@/lib/store-validation';
 export const dynamic = 'force-dynamic';
 
 const monthSchema = {type:'string',pattern:'^\\d{4}-(0[1-9]|1[0-2])$'};
@@ -18,6 +19,8 @@ const periodModeSchema = {enum:['month','ytd','year'],description:'month: select
 const periodProperties = {month:monthSchema,periodMode:periodModeSchema};
 const tools = [
   {name:'get_refresh_contract',description:'Read the supported cloud updater procedure, raw Finances bundle contract and last update status. Use this for routine source refreshes.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
+  {name:'get_workflow_checkpoint',description:'Read a stable hash-only checkpoint of source data and independent saved records, including budget, planning and recorded schedule. Creates no plans and is not a recovery backup. Retain independentHash before an authorized refresh.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
+  {name:'verify_finance_refresh',description:'Read-only verification of your succeeded refresh run against its committed source hash, counts, unchanged independent records and three canonical period summaries. Returns bounded hashes and counts, never source rows or amounts. A missing legacy proof remains unverified.',inputSchema:{type:'object',properties:{runId:{type:'string'},expectedIndependentHash:{type:'string',pattern:'^[a-f0-9]{64}$'}},required:['runId','expectedIndependentHash'],additionalProperties:false}},
   {name:'begin_finance_refresh',description:'Begin a private refresh attempt and return the exact source date window and run ID. Retrieve all source pages before committing. If alreadyRunning true, inspect status rather than starting a second writer.',inputSchema:{type:'object',properties:{fullHistory:{type:'boolean'}},additionalProperties:false}},
   {name:'commit_finance_refresh',description:'Validate and atomically merge raw paginated Finances data, retaining history and all user corrections. Read get_refresh_contract and begin_finance_refresh first. Never submit partial pages or fabricated source fields.',inputSchema:{type:'object',properties:{runId:{type:'string'},bundle:{type:'object'}},required:['runId','bundle'],additionalProperties:false}},
   {name:'fail_finance_refresh',description:'Record a failed source update with a plain-language reason; retain the last good snapshot.',inputSchema:{type:'object',properties:{runId:{type:'string'},error:{type:'string'}},required:['runId','error'],additionalProperties:false}},
@@ -31,14 +34,14 @@ const tools = [
   {name:'get_money_movements',description:'Read source-supported transfers, card repayments, investment movements and unresolved activity. Explicitly excluded Zelle records have a separate view; the payment rail alone does not exclude a record. Gross account legs retain their posting dates.',inputSchema:{type:'object',properties:periodProperties,additionalProperties:false}},
   {name:'get_dashboard_status',description:'Read Neonworth data coverage and last saved snapshot. No bank synchronization occurs.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
   {name:'get_month_summary',description:'Read period income, spending and tracking surplus. Classified cash income and verified received equity are separate. Transfers and share sales are not new income. Source amounts, corrections and coverage limits remain authoritative.',inputSchema:{type:'object',properties:{...periodProperties,routineOnly:{type:'boolean'}},additionalProperties:false}},
-  {name:'import_finance_dataset',description:'Import a full validated snapshot or explicitly restore a backup. Preserve source records, corrections, retirement annotations and review decisions. Use the atomic refresh protocol for ongoing updates.',inputSchema:{type:'object',properties:{dataset:{type:'object'},transactionOverrides:{type:'object'},retirementOverrides:{type:'object'},reviewPreferences:{type:'object'}},required:['dataset'],additionalProperties:false}},
+  {name:'import_finance_dataset',description:'Import a full validated snapshot or explicitly restore a backup. Use initialOnly true for first population of an empty destination, without restore maps. Preserve source records, corrections, retirement annotations and review decisions. Use the atomic refresh protocol for ongoing updates.',inputSchema:{type:'object',properties:{dataset:{type:'object'},initialOnly:{type:'boolean'},transactionOverrides:{type:'object'},retirementOverrides:{type:'object'},reviewPreferences:{type:'object'}},required:['dataset'],additionalProperties:false}},
   {name:'get_import_contract',description:'Get the Neonworth import format, income policy and safe ongoing update procedure.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
   {name:'get_saved_dataset',description:'Read saved source data, corrections, settings and retained statement annotations for an authorized update or analysis.',inputSchema:{type:'object',properties:{},additionalProperties:false}},
   {name:'update_transaction_classification',description:'Save an explicitly requested transaction correction in this application only. Category and accounting treatment choices take priority over inference. Does not mutate providers or infer tax treatment.',inputSchema:{type:'object',properties:{id:{type:'string'},patch:{type:'object',properties:{category:{type:'string'},flow:{enum:['expense','income','transfer','review']},exceptional:{type:'boolean'},note:{type:'string'},review:{type:'boolean'},reviewDecision:{enum:['cash_income','purchase_refund','zelle','interest','transfer','expense',null]}},additionalProperties:false}},required:['id','patch'],additionalProperties:false}},
 ];
 
 const contract = {
-  version:1,endpoint:'/api/import',payload:'{dataset:Dataset, transactionOverrides?: optional authoritative backup corrections, retirementOverrides?: optional backup annotations, reviewPreferences?: optional backup review decisions; omit corrections/annotations for routine source updates}',
+  version:1,endpoint:'/api/import',limits:{requestBytes:MAX_REQUEST_BYTES},capabilities:{initialOnly:true},payload:'{dataset:Dataset, initialOnly?: boolean empty-destination guard (no restore maps allowed), transactionOverrides?: optional authoritative backup corrections, retirementOverrides?: optional backup annotations, reviewPreferences?: optional backup review decisions; omit corrections/annotations for routine source updates}',
   spendingPolicy:{paymentRails:'Classify from source evidence and explicit choices. No blanket Zelle exclusion or card-payment spending proxy is enabled by default.'},
   incomePolicy:{bankIncome:'Posted explicitly classified bank income from any employer or source.',equity:'Explicit RSU receipts × verified receipt-date prices; gross/net tax basis is not inferred.',sales:'Asset conversions, excluded from new income.'},
   retirementEvidence:'Optional version1 source evidence. Retain exact account/transaction IDs, all kinds and descriptions. Observed contribution amounts do not establish pre-tax, after-tax, Roth, deductibility or employee/employer sources. Keep stored statement annotations for preservation without presenting unsupported splits.',
@@ -98,16 +101,18 @@ export async function POST(request:Request) {
     mutation=['begin_finance_refresh','commit_finance_refresh','fail_finance_refresh','configure_refresh_schedule','import_finance_dataset','update_recurring_status','resolve_review_finding','update_transaction_classification'].includes(query.params?.name);
     switch(query.params?.name) {
       case 'get_refresh_contract':result=await getRefreshContract();break;
+      case 'get_workflow_checkpoint':result=await getWorkflowCheckpoint();break;
+      case 'verify_finance_refresh':result=await verifyFinanceRefresh(args.runId,args.expectedIndependentHash);break;
       case 'begin_finance_refresh':result=await beginRefresh(args.fullHistory===true);break;
       case 'commit_finance_refresh':result=await commitRefresh(args.runId,args.bundle);break;
       case 'fail_finance_refresh':result=await failRefresh(args.runId,args.error);break;
       case 'configure_refresh_schedule':result=await configureRefreshSchedule(args.schedule);break;
-      case 'get_import_contract':result={...contract,refresh:await getRefreshContract()};break;
+      case 'get_import_contract':{const state=await readState();result={...contract,refresh:state.dataset?await getRefreshContract():null};break;}
       case 'get_saved_dataset':result=await readState();break;
       case 'get_dashboard_status':{
         const state=await readState();result={asOf:state.dataset?.asOf,syncedAt:state.dataset?.syncedAt,accounts:state.dataset?.accounts.length||0,transactions:state.dataset?.transactions.length||0,automaticBankSync:false,updateMode:'snapshot-import',refresh:state.refresh,incomePolicy:'Explicitly classified cash income plus verified RSU receipt valuations; tax basis unknown'};break;
       }
-      case 'import_finance_dataset':result=await saveDataset(args.dataset,args.retirementOverrides,args.reviewPreferences,args.transactionOverrides);break;
+      case 'import_finance_dataset':result=await saveDataset(args.dataset,args.retirementOverrides,args.reviewPreferences,args.transactionOverrides,undefined,args.initialOnly===undefined?false:args.initialOnly);break;
       case 'update_recurring_status':result=await updatePreference({type:'recurring-status',id:args.id,status:args.status,effectiveDate:args.effectiveDate});break;
       case 'resolve_review_finding':result=await updatePreference({type:'review-resolution',id:args.id,state:args.state,evidenceKey:args.evidenceKey});break;
       case 'update_transaction_classification':{

@@ -4,8 +4,8 @@ import { join } from 'node:path';
 
 // Application source only. Never inspect .git, credentials, runtime stores,
 // exported financial records or build outputs to identify the running app.
-const directories = ['app', 'lib', 'components', 'hooks', 'db', 'worker', 'public', 'vendor'];
-const configFiles = ['vite.config.ts', 'next.config.ts', 'postcss.config.mjs', 'package.json', 'pnpm-lock.yaml', 'tsconfig.json', '.node-version', 'wrangler.example.jsonc', 'scripts/app-build-id.mjs'];
+const directories = ['app', 'lib', 'components', 'hooks', 'db', 'worker', 'public', 'vendor', 'profiles'];
+const configFiles = ['vite.config.ts', 'vite.sites.config.ts', 'next.config.ts', 'postcss.config.mjs', 'package.json', 'pnpm-lock.yaml', 'tsconfig.json', '.node-version', 'wrangler.example.jsonc', 'scripts/app-build-id.mjs'];
 
 /** A stable fingerprint shared by the browser and Worker from the same build. */
 export function appBuildId(root) {

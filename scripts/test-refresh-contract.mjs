@@ -162,10 +162,10 @@ try {
   assert.equal(state.settings.savingsTarget, 37);
   assert.deepEqual(await store.readRecord('budget-plan-v1'), { savedPlan: 'synthetic sentinel' });
   assert.equal((await call('get_dashboard_status')).refresh.lastRun.id, begin.runId);
-  // The generic raw adapter does not convert an employer-name match into
-  // income. Explicit confirmation exercises the same correction API used by
-  // the owner before the period summaries count this synthetic credit.
-  assert.equal(state.dataset.transactions.find(row => row.id === 'salary').flow, 'review');
+  // Actual high-confidence provider salary evidence is supported without an
+  // employer-name rule. Explicit correction still uses the same saved API.
+  assert.equal(state.dataset.transactions.find(row => row.id === 'salary').flow, 'income');
+  assert.equal(state.dataset.transactions.find(row => row.id === 'salary').category, 'Payroll');
   await call('update_transaction_classification', { id: 'salary', patch: { flow: 'income', category: 'Cash income', review: false } });
   for (const periodMode of ['month', 'ytd', 'year']) assert.equal((await call('get_month_summary', { month: '2026-10', periodMode })).income, 1000);
   const committed = rows(), count = logs();

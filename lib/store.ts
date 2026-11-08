@@ -138,9 +138,11 @@ function mergeReviewPreferencesStatements(patch:ReviewPreferencesPatch) {
 export async function readState() {
   // refresh-status is independent of the other records, so it is read in the same parallel batch.
   const [dataset,overrides,settings,retirementOverrides,reviewPreferences,refresh] = await Promise.all([read('dataset'),read('overrides'),read('settings'),read('retirement-overrides'),readReviewPreferences(),read('refresh-status')]);
-  return {dataset:dataset as Dataset|null, overrides:overrides||{}, settings:settings||{savingsTarget:30}, retirementOverrides:retirementOverrides||{},reviewPreferences,refresh};
+  return {dataset:dataset as Dataset|null, overrides:overrides||{}, settings:settings||{}, retirementOverrides:retirementOverrides||{},reviewPreferences,refresh};
 }
-export async function saveDataset(input:unknown, retirementOverrides?:unknown, reviewPreferences?:unknown, transactionOverrides?:unknown, refreshCommit?:{expectedDataset:Dataset;expectedOverrides:unknown;expectedStatus:unknown;nextStatus:unknown}) {
+export async function saveDataset(input:unknown, retirementOverrides?:unknown, reviewPreferences?:unknown, transactionOverrides?:unknown, refreshCommit?:{expectedDataset:Dataset;expectedOverrides:unknown;expectedStatus:unknown;nextStatus:unknown}, initialOnly:unknown=false) {
+  if(typeof initialOnly!=='boolean')throw new Error('initialOnly must be a boolean.');
+  if(initialOnly&&(retirementOverrides!==undefined||reviewPreferences!==undefined||transactionOverrides!==undefined||refreshCommit!==undefined))throw new Error('Initial-only import accepts source data without restored independent records.');
   assertCredentialFree(input);
   for(const value of [retirementOverrides,reviewPreferences,transactionOverrides,refreshCommit?.nextStatus])if(value!==undefined)assertCredentialFree(value);
   const parsed = datasetSchema.parse(input) as Dataset;
@@ -152,6 +154,7 @@ export async function saveDataset(input:unknown, retirementOverrides?:unknown, r
   const restoredReviewPreferences=reviewPreferences===undefined?undefined:validateReviewPreferences(reviewPreferences,parsed,recurringIds(parsed,combinedTransactionOverrides));
   const loaded=await loadDataset();
   const existing=loaded.dataset;
+  if(initialOnly&&existing!==null)throw new RecordConflict('Initial import requires an empty destination. Read the saved data before continuing.');
   const overrideRecord=refreshCommit?await rawRecord('overrides'):null;
   const statusRecord=refreshCommit?await rawRecord('refresh-status'):null;
   if(refreshCommit&&(!sameDatasetContent(existing,refreshCommit.expectedDataset)||!sameDatasetContent(savedTransactionOverrides,refreshCommit.expectedOverrides)||!sameDatasetContent(overrideRecord?parseRecordValue(overrideRecord.value):{},savedTransactionOverrides)||!sameDatasetContent(statusRecord?parseRecordValue(statusRecord.value):null,refreshCommit.expectedStatus)))throw new RecordConflict('Saved data or corrections changed during refresh. Start a new update from the latest snapshot.');
@@ -198,6 +201,8 @@ export async function saveDataset(input:unknown, retirementOverrides?:unknown, r
   if(restoredReviewPreferences!==undefined&&!reviewAnnotationsUnchanged)operations.push(...mergeReviewPreferencesStatements(restoredReviewPreferences));
   if(restoredTransactionOverrides!==undefined&&!transactionAnnotationsUnchanged)operations.push(...mergeTransactionOverridesStatements(restoredTransactionOverrides));
   if(operations.length) {
+    // This same atomic guard covers initialOnly: the empty-source read above
+    // cannot be invalidated by another initial writer before publication.
     try {await db().batch([unchangedDatasetGuard(loaded.recordValue),...operations]);}
     catch(error) {
       if(error instanceof Error&&/NOT NULL constraint failed:\s*finance_records\.key/i.test(error.message))throw new RecordConflict('Saved data or corrections changed during this update. Reload before retrying.');

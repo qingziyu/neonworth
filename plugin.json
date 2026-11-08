@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "neonworth-workflows",
+  "version": "0.2.0-alpha.1",
+  "description": "Create, refresh, upgrade and recover a private Neonworth finance workspace using the user's authorized Sites and financial tools.",
+  "author": { "name": "Neonworth contributors" },
+  "repository": "https://github.com/yaokaiy/neonworth",
+  "license": "MIT",
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/neonworth-workflows/SKILL.md",
+      "interface": {
+        "displayName": "Neonworth workflows",
+        "shortDescription": "Private finance workflows",
+        "longDescription": "Instructions for creating, refreshing, upgrading and recovering Neonworth. Uses separately available, user-authorized Sites and financial-source capabilities. Includes no bank connection, server, credentials or automatic scheduler; installation alone performs no account or deployment action.",
+        "developerName": "Neonworth contributors",
+        "category": "Productivity",
+        "capabilities": []
+      }
+    }
+  }
+}

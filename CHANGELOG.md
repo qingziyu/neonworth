@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0-alpha.1
+
+- Added a separate owner-private ChatGPT Sites runtime and build profile, sanitized instance export/setup, and native-hosting instructions without changing standalone Access authentication.
+- Added a GPT Finance collection contract and deterministic initial/refresh/readback harness around the existing financial models, storage and MCP operations.
+- Added atomic first-import protection and high-confidence source salary/interest normalization without employer assumptions.
+- Added setup, refresh, upgrade and recovery prompts, a routed skill, an instructions-only plugin and a repository plugin catalog.
+- Added private Site HTTP verification and saved-record hash comparisons; code publication, financial refresh and scheduling remain distinct operations.
+
 ## 0.1.0-alpha.2
 
 - Put spending, budgets and financial goals first in the README and package description, with deployment instructions kept in the technical guide.

@@ -10,6 +10,7 @@ export type SourcePage = {cursor:string|null; result:{items:Record<string,any>[]
 export type RefreshBundle = {accounts:Record<string,any>; bank:SourcePage[]; inflows:SourcePage[]; investments:SourcePage[]; recurring:SourcePage[]; netWorth:Record<string,any>; rsuPrices?:NonNullable<Dataset['incomeEvidence']>['rsuPrices']};
 export type RefreshRun = {id:string;status:'running'|'succeeded'|'failed';startedAt:string;finishedAt?:string;start:string;end:string;baseSyncedAt:string;error?:string;report?:Record<string,any>};
 export type RefreshState = {lastRun?:RefreshRun;lastSuccess?:RefreshRun;schedule?:{id:string;enabled:boolean;timezone:string;hour:number;verifiedAt:string}};
+export class FullHistoryRequired extends Error {constructor(){super('A new account needs a full historical backfill. Begin again with fullHistory true.');this.name='FullHistoryRequired';}}
 const fail=(message:string):never=>{throw new Error(message)};
 const finite=(value:unknown,label:string):number=>typeof value==='number'&&Number.isFinite(value)?value:fail(`Missing or invalid ${label}; the saved snapshot was kept.`);
 const usd=(row:Record<string,any>)=>{if(row.iso_currency_code!=='USD'||row.unofficial_currency_code)fail('A source record has an unsupported or unknown currency. The saved snapshot was kept.');};
@@ -52,8 +53,8 @@ export function buildRefresh(previous:Dataset,overrides:Record<string,Partial<Tr
  const missingAccounts=previous.accounts.filter(a=>!active.has(a.id));
  // An absent account is not a zero balance. Keep its last recorded value and history.
  accounts.push(...missingAccounts.map(a=>({...a,syncStatus:'Missing from latest feed'})));
- if(accounts.some(a=>!oldAccounts.has(a.id))&&run.start!==previous.dateRange.start)fail('A new account needs a full historical backfill. Begin again with fullHistory true.');
- const known=new Set(accounts.map(a=>a.id));
+ const needsBackfill=accounts.some(a=>!oldAccounts.has(a.id))&&run.start!==previous.dateRange.start;
+ const accountById=new Map(accounts.map(a=>[a.id,a])),known=new Set(accountById.keys());
  const bank=sourceRows(bundle.bank,'Bank transactions'),inflows=sourceRows(bundle.inflows,'Posted inflows'),investments=sourceRows(bundle.investments,'Investment transactions',false),recurring=sourceRows(bundle.recurring,'Recurring transactions');
  inWindow(bank,run,known);inWindow(inflows,run,known);inWindow(investments,run,known);
  const fresh=unique(bank,'transaction_id','bank'),inflowMap=unique(inflows,'transaction_id','inflow'),investmentMap=unique(investments,'investment_transaction_id','investment');unique(recurring,'stream_id','recurring');
@@ -73,8 +74,13 @@ export function buildRefresh(previous:Dataset,overrides:Record<string,Partial<Tr
   const old=prior.get(r.transaction_id),changed=!!old&&(old.accountId!==r.account_id||old.date!==r.date||cents(old.amount)!==cents(r.amount));
   if(changed&&overrides[r.transaction_id])fail('A reviewed source amount, date or account changed. The saved snapshot was kept so your decision is not applied to different evidence.');
   if(changed)updated.push(r.transaction_id);if(!old)added.push(r.transaction_id);
-  const category=labelCategory(r.personal_finance_category?.primary||'other'),confidence=r.personal_finance_category?.confidence_level||'UNKNOWN';
-  const flow=category==='Transfers'||r.amount<0?'review':'expense';
+  const provider=r.personal_finance_category,confidence=provider?.confidence_level||'UNKNOWN';
+  const primary=typeof provider?.primary==='string'?provider.primary.toLowerCase():'',detailed=typeof provider?.detailed==='string'?provider.detailed.toLowerCase():'';
+  // A source-classified salary/interest credit is evidence; an employer name or
+  // a generic deposit is not. Existing rows and saved corrections remain intact.
+  const explicitIncome=!r.pending&&r.amount<0&&accountById.get(r.account_id)?.type==='depository'&&primary==='income'&&['HIGH','VERY_HIGH'].includes(confidence)&&['income_salary','income_wages','income_interest_earned'].includes(detailed);
+  const category=explicitIncome?(detailed==='income_interest_earned'?'Interest':'Payroll'):labelCategory(provider?.primary||'other');
+  const flow=explicitIncome?'income':category==='Transfers'||r.amount<0?'review':'expense';
   const categoryUncertain=category==='Other'||['LOW','UNKNOWN'].includes(confidence);
   // Record why this new flag was generated so category uncertainty can become
   // optional without treating arbitrary blank-note historical flags as advice.
@@ -112,5 +118,8 @@ export function buildRefresh(previous:Dataset,overrides:Record<string,Partial<Tr
  const retirementStart=[previous.retirementEvidence?.scope.start||previous.dateRange.start,run.start].sort()[0];
  const dataset:Dataset={...previous,asOf:run.end,syncedAt:stamp,dateRange:{start:previous.dateRange.start,end:run.end},accounts,transactions:allTransactions,recurring,netWorthHistory:[...history.values()].sort((a,b)=>a.date.localeCompare(b.date)),coverage:{...previous.coverage,accounts:{is_complete_for_query:missingAccounts.length===0,freshness:'unknown',availability:'ready',state:missingAccounts.length?'partial':'complete'},transactions:{...previous.coverage.transactions as object,...bundle.bank[0].result.coverage,is_complete_for_query:!missingAccounts.length&&!allTransactions.some(t=>(t as any).sourceMissingSince)&&((previous.coverage.transactions as any)?.is_complete_for_query===true||run.start===previous.dateRange.start)},recurring:bundle.recurring[0].result.coverage,refresh:{start:run.start,end:run.end,checkedAt:stamp,missingAccountIds:missingAccounts.map(a=>a.id),investmentCompleteness:'unknown',balanceFreshness:'unknown',bankPageCoverage:bundle.bank[0].result.coverage,sourceDifferences:allTransactions.filter(t=>(t as any).sourceMissingSince).map(t=>({id:t.id,date:t.date,merchant:t.merchant,amount:t.amount,isZelle:isZelleTransaction({...t,...overrides[t.id]}),firstMissing:(t as any).sourceMissingSince}))}},incomeEvidence:{...income,asOf:run.end,readAt:stamp,bankCoverage:bundle.bank[0].result.coverage!,bankInflowCount:bankInflows.length,bankInflowTotal:bankInflows.reduce((n,t)=>n-cents(t.amount),0)/100,pendingInflowCount:allTransactions.filter(t=>t.pending&&t.amount<0).length,investmentRecords:rows,accountHistory,rsuPrices:[...prices.values()]},retirementEvidence:{version:1,scope:{start:retirementStart,end:run.end,sourceReadAt:stamp,isCompleteForQuery:null,freshness:'unknown',description:'Available investment records; pagination was exhausted, but the source does not establish complete brokerage history.'},accountScopes:accounts.filter(isRetirementAccount).map(a=>{const rows=retRows.filter(r=>r.accountId===a.id).sort((a,b)=>a.date.localeCompare(b.date));return {accountId:a.id,firstRecordDate:rows[0]?.date||null,lastRecordDate:rows.at(-1)?.date||null,recordCount:rows.length,coverageComplete:null,freshness:'unknown'};}),records:retRows,notes:previous.retirementEvidence?.notes||[]}};
  const parsed=datasetSchema.parse(dataset);
+ // Request a backfill only after validating the complete normalized collection.
+ // Malformed source pages or accounts must not trigger another collection.
+ if(needsBackfill)throw new FullHistoryRequired();
  return {dataset:parsed,report:{window:{start:run.start,end:run.end},bankRows:bank.length,postedInflows:inflows.length,inflowTotal:inflows.reduce((n,r)=>n-cents(r.amount),0)/100,investmentRows:investments.length,recurringStreams:recurring.length,newTransactions:added.length,changedTransactions:updated.length,removedPending:removedPending.length,missingAccounts:missingAccounts.map(a=>a.name),sourceDifferences:allTransactions.filter(t=>(t as any).sourceMissingSince).map(t=>({id:t.id,date:t.date,merchant:t.merchant,amount:t.amount,isZelle:isZelleTransaction({...t,...overrides[t.id]}),firstMissing:(t as any).sourceMissingSince})),sourceFreshness:'unknown',investmentCompleteness:'unknown',netWorthThrough:[...history.keys()].sort().at(-1)}};
 }

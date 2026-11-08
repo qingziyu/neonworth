@@ -7,6 +7,8 @@ description: Add or adapt a Neonworth data-source importer or independently host
 
 Work from the Neonworth repository root. Preserve the user's requested data source, deployment choice and authorized scope. This skill does not authorize account access, provider writes, public sharing or deployment by itself.
 
+For creating or maintaining an actual Neonworth Site with an already-authorized financial source, use the sibling [workflow skill](../neonworth-workflows/SKILL.md). This skill covers changes to adapters and backend implementations.
+
 Choose the smallest relevant extension:
 
 - **New data source:** read `integrations/README.md`, `docs/IMPORTING.md`, `contracts/dataset-v1.schema.json` and the runtime schema in `lib/store-validation.ts`. Adapt the offline CSV example or add an external collector. Reuse the bundled backend.
