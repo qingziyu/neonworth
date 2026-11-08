@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Refined the project introduction around its cyberpunk neon design, Matrix-inspired binary rain and personal finance workflows; clarified the demo and ChatGPT entry points.
+
 ## 0.2.0-alpha.1
 
 - Added a separate owner-private ChatGPT Sites runtime and build profile, sanitized instance export/setup, and native-hosting instructions without changing standalone Access authentication.

@@ -2,9 +2,9 @@
 
 # Neonworth
 
-**Your finances. In a different light.**
+**Your money. Decoded in neon.**
 
-An open-source personal finance workspace for understanding your spending, tracking your progress and planning what comes next.
+An open-source finance dashboard with a cyberpunk design: Matrix-inspired binary rain, neon charts, and a clear view of spending, net worth, and financial goals.
 
 [![CI](https://github.com/yaokaiy/neonworth/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/yaokaiy/neonworth/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-8bd5ca)](LICENSE)
@@ -14,11 +14,13 @@ An open-source personal finance workspace for understanding your spending, track
 
 </div>
 
-Neonworth brings spending, cash flow, budgets, goals and net worth into one neon workspace. Inspect the records behind a total, correct a transaction without losing its source, and keep repayments separate from spending. Incomplete evidence stays visible.
+Turn your financial history into a personal control room. Follow cash flow, understand where spending goes, and plan toward the goals you choose—from next month's budget to financial independence.
+
+Inspect the transactions behind your spending, and save corrections alongside the original evidence. Supported card repayments stay separate from spending; gaps in source coverage stay visible.
 
 [![Neonworth overview with a dark neon interface, binary rain, financial summaries and monthly spending bars](docs/images/overview.png)](https://yaokaiy.github.io/neonworth/)
 
-*Real application screenshots with invented data. Warm and cool neon accents, binary rain and consistent chart styling—[open the demo](https://yaokaiy.github.io/neonworth/) to see the motion and explore reports.*
+*Warm and cool neon. Binary rain. Charts that feel like instruments. These are real application screenshots with invented data—[step inside the demo](https://yaokaiy.github.io/neonworth/) to explore the atmosphere and the reports.*
 
 <details>
 <summary>See the spending view</summary>
@@ -27,28 +29,35 @@ Neonworth brings spending, cash flow, budgets, goals and net worth into one neon
 
 </details>
 
-The public demo needs no signup or bank connection. Reports, dates, filters and display preferences are interactive; imports and financial saves are disabled. [Run the full app locally](#try-it-locally) to use your own data, or read [how the demo is built](docs/DEMO.md).
+**Take the controls:** switch reports, change dates, inspect transactions, hide amounts, or turn on Quiet mode. The public demo needs no signup or bank connection. All records are invented; imports and financial saves are disabled. [Run the full app locally](#try-it-locally) to use your own data, or read [how the demo is built](docs/DEMO.md).
 
-## What's inside
+## Your financial control room
 
-- **Overview and spending:** consistent monthly, year-to-date and rolling-year reports, categories and dated net-worth observations.
-- **Activity and review:** searchable transactions, category selection, explicit accounting decisions, supported repayment/refund reconciliation and preserved source evidence.
-- **Budgets:** configurable monthly limits and annual allocations, with actual spending and coverage shown separately.
-- **Goals and FIRE:** user-entered withdrawal needs, rates, eligible assets and future dates. Optional projections require explicit assumptions.
-- **Year in review:** large purchases and user-defined events, with linked refunds and no duplicate memberships.
-- **Income and assets:** cash and received equity shown separately; unknown prices or incomplete investment coverage stay visible.
-- **Neon workspace:** shared binary rain, instrument-style bars, quiet mode, reduced-motion support and amount hiding.
-- **ChatGPT workflows:** create a private Sites instance, import already-authorized GPT Finance records, refresh with verified readback, and preserve records through upgrades and interrupted operations.
+- **Read your spending:** explore categories and compare monthly, year-to-date and rolling-year reports alongside dated net-worth observations.
+- **Follow the evidence:** search transactions, choose their categories, and save accounting corrections while preserving original records. Supported repayments and refunds reconcile with their source evidence.
+- **Give your budget a purpose:** set monthly limits and annual allocations, then inspect actual spending and the history available to support it.
+- **Model your path to FIRE:** enter withdrawal needs, rates, eligible assets and future target dates. Explore optional projections using assumptions you choose.
+- **Replay your year:** revisit large purchases and organize your own events, with linked refunds and transactions counted once.
+- **Separate cash from equity:** understand cash income and received shares separately, with unknown prices and investment coverage kept explicit.
+- **Choose your atmosphere:** continuous binary rain, neon bars and readable financial text, with Quiet mode, reduced-motion support and amount hiding.
+- **Bring your AI agent:** use the included workflows to create a private Sites instance from authorized GPT Finance records, verify refreshes, and preserve saved records through upgrades and interruptions.
 
 ## Use with ChatGPT
 
-For ChatGPT users with **Sites available and GPT Finance already connected and authorized**, this is the recommended managed-hosting path. Each installation gets its own private Site and database. The website receives validated financial records; provider credentials and source-access capabilities stay outside it.
+**Already using GPT Finance? Give your data a home.**
 
-Start with the [copy-and-paste setup prompt](prompts/start.md). It guides ChatGPT through capability checks, a separate instance, private publication, initial population and saved-state verification. It never asks you to reconnect a bank merely because a tool is missing from the current conversation. The current data contract is USD-only.
+For ChatGPT users with **Sites available and GPT Finance already connected and authorized**, this is the recommended managed-hosting path. Start with the [setup prompt](prompts/start.md): it guides your agent through creating a separate private Site and database, importing validated records, and verifying what was saved. Provider credentials and source-access capabilities stay outside the website.
 
-For ongoing use, copy the [refresh](prompts/refresh.md), [upgrade](prompts/upgrade.md) or [recovery](prompts/recovery.md) prompt. Recurring updates are optional and require verified unattended access. A data refresh does not rebuild or redeploy your website.
+| Your next move | Workflow |
+| --- | --- |
+| Create your workspace, or resume setup | [Start](prompts/start.md) |
+| Bring your financial records up to date | [Refresh](prompts/refresh.md) |
+| Install new code and keep your saved records | [Upgrade](prompts/upgrade.md) |
+| Resolve an interrupted operation | [Recovery](prompts/recovery.md) |
 
-The repository also provides an [installable workflow plugin and skill](prompts/README.md). Installation availability depends on the ChatGPT/Codex surface; this repository is not a public-directory approval claim. The [Sites deployment profile](profiles/sites/README.md), [Finance harness](integrations/gpt-finance/README.md) and [delivery contract](docs/SITES_DELIVERY.md) document the supported behavior and verification boundaries. See [release status](docs/RELEASE_STATUS.md) for actual evidence and remaining gates.
+The current data contract is USD-only. Tools must be available in the executing conversation; a missing tool does not mean your bank needs reconnecting. Recurring updates are optional and require verified unattended access. Refreshing data does not rebuild or redeploy the website.
+
+You can also use the [workflow plugin and skill](prompts/README.md) where installation is supported; this repository does not claim a public-directory listing. For the technical boundaries, read the [Sites profile](profiles/sites/README.md), [Finance harness](integrations/gpt-finance/README.md), [delivery contract](docs/SITES_DELIVERY.md) and [release evidence](docs/RELEASE_STATUS.md).
 
 ## Try it locally
 

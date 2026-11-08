@@ -97,7 +97,7 @@
   },
   "packageManager": "pnpm@11.25.0",
   "license": "MIT",
-  "description": "An open-source personal finance workspace for spending, budgets, net worth and financial goals.",
+  "description": "A cyberpunk personal finance dashboard with Matrix-inspired binary rain, spending reports, budgets, net worth and FIRE planning.",
   "repository": {
     "type": "git",
     "url": "https://github.com/yaokaiy/neonworth.git"
