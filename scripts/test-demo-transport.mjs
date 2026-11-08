@@ -7,6 +7,8 @@ import { deriveDataset } from '../lib/classification.ts';
 import { summarizePeriod } from '../lib/finance.ts';
 import { summarizeIncome } from '../lib/income.ts';
 import { summarizeFire } from '../lib/fire.ts';
+import { netWorthForPeriod } from '../lib/net-worth.ts';
+import { resolvePeriod } from '../lib/periods.ts';
 import { summarizeYearReview, validateReviewEvents } from '../lib/year-review.ts';
 import { DEMO_MARKER } from './demo-data.mjs';
 
@@ -22,6 +24,21 @@ const planning = planningSchema.parse((await read('/api/planning')).plan);
 assert.equal(data.asOf, DEMO_AS_OF); assert.equal(data.asOf, '2026-11-07');
 assert.ok(data.notes.includes(DEMO_MARKER));
 assert.ok(data.accounts.every(account => account.id.startsWith('demo-') && account.institution === 'Example Institution'));
+assert.deepEqual(data.netWorthHistory.at(-1), { date: DEMO_AS_OF, value: 257483.62, events: [] });
+assert.equal(planning.goals.fire.eligibleAssets, data.accounts.find(account => account.id === 'demo-investments').netBalance);
+for (const [month, mode, firstDate, dayCount] of [
+  ['2026-10', 'month', '2026-10-01', 31],
+  ['2026-10', 'ytd', '2026-01-01', 304],
+  ['2026-10', 'year', '2025-12-01', 335],
+  ['2026-11', 'month', '2026-11-01', 7],
+]) {
+  const { points } = netWorthForPeriod(data, resolvePeriod(data, month, mode));
+  const start = Date.parse(firstDate);
+  const expectedDates = Array.from({ length: dayCount }, (_, i) => new Date(start + i * 86_400_000).toISOString().slice(0, 10));
+  assert.deepEqual(points.map(point => point.date), expectedDates, `${month} ${mode} has one observation per covered day`);
+  assert.ok(points.at(-1).value > points[0].value, `${month} ${mode} gains overall`);
+  assert.ok(points.some((point, i) => i > 0 && point.value < points[i - 1].value), `${month} ${mode} includes a drawdown`);
+}
 assert.deepEqual(saved.overrides, {}); assert.deepEqual(saved.settings, {}); assert.equal(saved.refresh, null);
 assert.deepEqual(saved.reviewPreferences, { findingResolutions: {}, recurringStatuses: {} });
 const derived = deriveDataset(data);

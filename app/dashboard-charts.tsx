@@ -5,13 +5,14 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Too
 import { ChartBarSkin } from './chart-bar';
 import { money, labelCategory, type summarizePeriod } from '@/lib/finance';
 import { SpendingHatch } from './chart-primitives';
+import { DEMO_MODE } from '@/lib/client-transport';
 
 const currency=(value:number)=>money(value,0);
 const short=(value:number)=>Math.abs(value)>=1000?`$${(value/1000).toFixed(Math.abs(value)>=10000?0:1)}k`:`$${Math.round(value)}`;
 const prettyDate=(value:string)=>new Date(`${value.slice(0,10)}T12:00:00`).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-function ChartTip({active,payload,label,hidden}:any) {
+function ChartTip({active,payload,label,hidden,digits=0}:any) {
  if(!active||!payload?.length)return null;
- return <div className="chart-tooltip"><strong>{label}</strong>{payload.filter((entry:any)=>entry.value!==null).map((entry:any,index:number)=><div key={index}><span style={{color:entry.dataKey==='spending'?'var(--chart-spending)':entry.color}}>{entry.name}</span><b>{hidden?'••••':currency(Number(entry.value))}</b></div>)}</div>;
+ return <div className="chart-tooltip"><strong>{label}</strong>{payload.filter((entry:any)=>entry.value!==null).map((entry:any,index:number)=><div key={index}><span style={{color:entry.dataKey==='spending'?'var(--chart-spending)':entry.color}}>{entry.name}</span><b>{hidden?'••••':money(Number(entry.value),digits)}</b></div>)}</div>;
 }
 
 // These components receive the existing calculated series without recalculating,
@@ -26,5 +27,5 @@ export function SpendingTrendChart({trend,category,hidden}:{trend:Array<{label:s
 }
 
 export function NetWorthChart({points,hidden}:{points:Array<{date:string;value:number}>;hidden:boolean}) {
- return hidden?<div className="chart-private">Show amounts to view this chart.</div>:<div className="chart networth-chart"><ResponsiveContainer width="100%" height="100%"><AreaChart data={points} margin={{left:0,right:10,top:20,bottom:10}}><defs><linearGradient id="wealthFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--chart-cash)" stopOpacity={0.35}/><stop offset="100%" stopColor="var(--chart-cash)" stopOpacity={0.02}/></linearGradient></defs><CartesianGrid vertical={false} stroke="var(--chart-grid)"/><XAxis dataKey="date" axisLine={false} tickLine={false} minTickGap={55} tickFormatter={value=>prettyDate(value)} tick={{fontSize:11,fill:'var(--muted)'}}/><YAxis domain={[0,'auto']} tickFormatter={short} tick={{fontSize:11,fill:'var(--muted)'}} axisLine={false} tickLine={false} width={65}/><Tooltip content={<ChartTip hidden={hidden}/>}/><Area isAnimationActive={false} name="Recorded net worth" dataKey="value" type="linear" stroke="var(--chart-cash)" strokeWidth={2.2} fill="url(#wealthFill)"/></AreaChart></ResponsiveContainer></div>;
+ return hidden?<div className="chart-private">Show amounts to view this chart.</div>:<div className="chart networth-chart"><ResponsiveContainer width="100%" height="100%"><AreaChart data={points} margin={{left:0,right:10,top:20,bottom:10}}><defs><linearGradient id="wealthFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--chart-cash)" stopOpacity={0.35}/><stop offset="100%" stopColor="var(--chart-cash)" stopOpacity={0.02}/></linearGradient></defs><CartesianGrid vertical={false} stroke="var(--chart-grid)"/><XAxis dataKey="date" axisLine={false} tickLine={false} minTickGap={55} tickFormatter={value=>prettyDate(value)} tick={{fontSize:11,fill:'var(--muted)'}}/><YAxis domain={DEMO_MODE&&points.length>1?['dataMin - 1000','dataMax + 1000']:[0,'auto']} tickFormatter={DEMO_MODE?currency:short} tick={{fontSize:11,fill:'var(--muted)'}} axisLine={false} tickLine={false} width={65}/><Tooltip content={<ChartTip hidden={hidden} digits={DEMO_MODE?2:0}/>}/><Area isAnimationActive={false} name="Recorded net worth" dataKey="value" type="linear" stroke="var(--chart-cash)" strokeWidth={2.2} fill="url(#wealthFill)"/></AreaChart></ResponsiveContainer></div>;
 }

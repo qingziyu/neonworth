@@ -1,5 +1,6 @@
 // Invented examples only. Never derive these values from a real financial export.
 export const DEMO_MARKER = 'Neonworth synthetic demo — no real accounts or activity';
+export const DEMO_BROKERAGE_BALANCE = 231_576.48;
 export function createDemoDataset(today = new Date().toISOString().slice(0, 10)) {
   const end = new Date(`${today}T12:00:00Z`);
   if (!Number.isFinite(end.getTime()) || end.toISOString().slice(0, 10) !== today) throw new Error('Invalid demo date.');
@@ -28,11 +29,28 @@ export function createDemoDataset(today = new Date().toISOString().slice(0, 10))
   add('demo-trip-transport', `${months[8]}-13`, 'Example Railway', 350, 'Travel');
   add('demo-review', today, 'Unidentified incoming payment', -75, 'Other', 'review', 'demo-checking', { review: true, confidence: 'LOW', note: 'Synthetic example: choose its accounting treatment after checking evidence.' });
   const account = (id, name, type, subtype, balance) => ({ id, name, institution: 'Example Institution', type, subtype, mask: '0000', balance: Math.abs(balance), netBalance: balance, balanceDate: today, balanceAgeKnown: true, syncStatus: 'synthetic' });
+  const accounts = [
+    account('demo-checking', 'Demo checking', 'depository', 'checking', 27_194.67),
+    account('demo-card', 'Demo credit card', 'credit', 'credit card', -1_287.53),
+    account('demo-investments', 'Demo investments', 'investment', 'brokerage', DEMO_BROKERAGE_BALANCE),
+  ];
+  // Work backward from today's balance. Steady savings and seeded market moves
+  // give every demo run the same gains and drawdowns for a given date.
+  const netWorthHistory = [];
+  const historyStart = new Date(`${months[0]}-01T12:00:00Z`);
+  let balanceCents = accounts.reduce((sum, { netBalance }) => sum + Math.round(netBalance * 100), 0);
+  let movementSeed = 451;
+  for (const date = new Date(end); date >= historyStart; date.setUTCDate(date.getUTCDate() - 1)) {
+    netWorthHistory.push({ date: date.toISOString().slice(0, 10), value: balanceCents / 100, events: [] });
+    movementSeed = (Math.imul(movementSeed, 1_664_525) + 1_013_904_223) >>> 0;
+    const marketMoveCents = movementSeed % 180_001 - 90_000;
+    balanceCents -= 10_000 + marketMoveCents;
+  }
   return {
     version: 1, asOf: today, syncedAt: `${today}T12:00:00Z`, dateRange: { start: `${months[0]}-01`, end: today },
-    accounts: [account('demo-checking', 'Demo checking', 'depository', 'checking', 18000), account('demo-card', 'Demo credit card', 'credit', 'credit card', -850), account('demo-investments', 'Demo investments', 'investment', 'brokerage', 42500)],
+    accounts,
     transactions,
-    netWorthHistory: months.map((month, i) => ({ date: i === months.length - 1 ? today : `${month}-01`, value: 44250 + i * 1400, events: [] })),
+    netWorthHistory: netWorthHistory.reverse(),
     recurring: [],
     coverage: { transactions: { is_complete_for_query: true, availability: 'ready', state: 'synthetic', freshness: 'synthetic' }, accounts: { is_complete_for_query: true, availability: 'ready', state: 'synthetic', freshness: 'synthetic' } },
     notes: [DEMO_MARKER, 'All names, amounts, account balances and dates are illustrative. No bank connection exists.'],

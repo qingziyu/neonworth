@@ -1,4 +1,4 @@
-import { createDemoDataset, DEMO_MARKER } from '../scripts/demo-data.mjs';
+import { createDemoDataset, DEMO_BROKERAGE_BALANCE, DEMO_MARKER } from '../scripts/demo-data.mjs';
 import { datasetSchema } from '../lib/store-validation';
 import { budgetPlanSchema } from '../lib/budget';
 import { planningSchema } from '../lib/planning';
@@ -31,9 +31,9 @@ function createExampleState() {
     goals: {
       version: 1,
       savings: { year: 2026, targetAmount: 10000, basis: 'cash' },
-      netWorth: { targetAmount: 100000, targetDate: '2030-11-07' },
+      netWorth: { targetAmount: 350000, targetDate: '2030-11-07' },
       fire: {
-        annualWithdrawalNeed: 48000, withdrawalRatePct: 4, eligibleAssets: 42500,
+        annualWithdrawalNeed: 48000, withdrawalRatePct: 4, eligibleAssets: DEMO_BROKERAGE_BALANCE,
         valuationDate: DEMO_AS_OF, targetDate: '2050-11-07', annualContribution: 18000, realReturnPct: 3,
         assetScope: 'Invented demo brokerage balance; excludes checking and home. All assumptions are illustrative.',
       },

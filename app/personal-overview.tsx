@@ -9,6 +9,7 @@ import { summarizeDataHealth } from "@/lib/data-health";
 import { summarizeReview } from "@/lib/review";
 import { accountDisplayName, transactionDisplayName } from "@/lib/classification";
 import { refreshTextForDisplay } from "@/lib/refresh-status";
+import { DEMO_MODE } from "@/lib/client-transport";
 
 export interface PersonalOverviewProps {
   motionEnabled?: boolean;
@@ -74,7 +75,7 @@ export default function PersonalOverview(props: PersonalOverviewProps) {
   useEffect(() => setPage(0), [month, periodMode]);
   const selectedCount = review.accountingReviewTransactionIds.length;
   const duplicateChecks = review.openFindings.filter(finding => finding.kind === "similar-charge");
-  const fmt = (amount: number) => hidden ? "••••" : money(amount, 0);
+  const fmt = (amount: number, digits = 0) => hidden ? "••••" : money(amount, digits);
   const selectedLabel = periodMode === "month" ? "Selected month" : periodMode === "ytd" ? "Year to date" : "Past year";
 
   return <div className="personal-overview">
@@ -126,7 +127,7 @@ export default function PersonalOverview(props: PersonalOverviewProps) {
         <span className="workspace-plan-icon"><Target size={22} aria-hidden="true" /></span>
         <span className="workspace-fire-copy"><span className="workspace-kicker">A longer view</span><strong>Your FIRE plan</strong><span>Open your withdrawal plan, eligible assets and future target date.</span><span className="workspace-plan-action">Open FIRE dashboard <ArrowRight size={15} aria-hidden="true" /></span></span>
       </button></PointerLight>
-      <button type="button" className="workspace-position-link" onClick={onNetWorth}><Wallet size={19} aria-hidden="true" /><span><span>Recorded net worth</span><strong>{netWorth ? fmt(netWorth.value) : "Not available"}</strong><small>{netWorth ? `Recorded ${dateLabel(netWorth.date)}` : "No dated snapshot on or before this period’s end"}</small></span><ArrowUpRight size={17} aria-hidden="true" /></button>
+      <button type="button" className="workspace-position-link" onClick={onNetWorth}><Wallet size={19} aria-hidden="true" /><span><span>Recorded net worth</span><strong>{netWorth ? fmt(netWorth.value, DEMO_MODE ? 2 : 0) : "Not available"}</strong><small>{netWorth ? `Recorded ${dateLabel(netWorth.date)}` : "No dated snapshot on or before this period’s end"}</small></span><ArrowUpRight size={17} aria-hidden="true" /></button>
       <button type="button" className="workspace-bills-link" onClick={onBills}><ReceiptText size={19} aria-hidden="true" /><span><strong>Bills & commitments</strong><small>Recorded charges and saved service decisions</small></span><ArrowRight size={17} aria-hidden="true" /></button>
     </section>
 

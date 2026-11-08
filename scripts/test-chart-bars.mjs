@@ -75,7 +75,7 @@ const variables=new Map();visit(home,node=>{if(ts.isVariableDeclaration(node)&&t
 const palette=['var(--chart-category-1)','var(--chart-category-2)','var(--chart-category-3)','var(--chart-category-4)'];
 for(const hidden of [false,true]){
  const clicks=[],categories=[{name:'Dining',value:100},{name:'Travel',value:25.25},{name:'Other',value:0},{name:'Services',value:-10}];
- const fmt=compile(variables.get('fmt'),asts.page,{hidden,currency:money});
+ const fmt=compile(variables.get('fmt'),asts.page,{hidden,money});
  const maskText=compile(variables.get('maskText'),asts.page,{hidden,refreshTextForDisplay});
  const card=compile(variables.get('catCard'),asts.page,{React,categories,hidden,palette,drill:name=>clicks.push(name),labelCategory,fmt,maskText,summary:{spending:115.25},Empty:()=>null});
  const tree=card(),tracks=withClass(tree,'category-track');assert.equal(tracks.length,4);
