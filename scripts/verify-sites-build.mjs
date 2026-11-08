@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { validateSitesManifest } from './sites-profile.mjs';
+import { verifySitesAssets } from './prepare-sites-assets.mjs';
 
 const emptyDefaults = {
   definedEnvironments: [], triggers: {}, durable_objects: { bindings: [] }, workflows: [], migrations: [], exports: {},
@@ -35,6 +36,7 @@ export function verifySitesBuild(root) {
     const bundled = validateSitesManifest(JSON.parse(readFileSync(resolve(root, 'dist/.openai/hosting.json'), 'utf8')));
     if (JSON.stringify(original) !== JSON.stringify(bundled)) throw new Error();
     verifySitesBuildConfiguration(JSON.parse(readFileSync(resolve(root, 'dist/server/wrangler.json'), 'utf8')));
+    verifySitesAssets(root);
     if (!existsSync(resolve(root, 'dist/server/index.js')) || !existsSync(resolve(root, 'dist/.openai/drizzle/meta/_journal.json'))) throw new Error();
     const proof = JSON.parse(readFileSync(resolve(root, 'dist/server/sites-profile-proof.json'), 'utf8'));
     if (proof.version !== 1 || proof.profile !== 'sites-owner-private' || proof.entry !== 'index.js'
@@ -44,6 +46,6 @@ export function verifySitesBuild(root) {
   } catch { throw new Error('Sites build verification failed. Check the instance manifest, Worker configuration and bundled migrations.'); }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try { verifySitesBuild(fileURLToPath(new URL('../', import.meta.url))); console.log('Sites artifact verified: DB/MCP manifest, bundled migrations, worker-first assets, no grants, and local access disabled. Native owner-private access still requires deployment verification.'); }
+  try { verifySitesBuild(fileURLToPath(new URL('../', import.meta.url))); console.log('Sites artifact verified: DB/MCP manifest, bundled migrations, Worker-only built asset URLs, no grants, and local access disabled. Native owner-private access still requires deployment verification.'); }
   catch (error) { console.error(error.message); process.exitCode = 1; }
 }

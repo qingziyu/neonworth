@@ -13,7 +13,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const root = fileURLToPath(new URL('../', import.meta.url));
   const profile = selectBuildProfile(root, process.env.NEONWORTH_HOSTING_PROFILE);
   for (const args of profile === 'sites'
-    ? [['scripts/run-sites.mjs', 'build'], ['scripts/verify-sites-build.mjs']]
+    ? [['scripts/run-sites.mjs', 'build'], ['scripts/prepare-sites-assets.mjs'], ['scripts/verify-sites-build.mjs']]
     : [['scripts/run-framework.mjs', 'build'], ['scripts/verify-build.mjs']]) {
     const result = spawnSync(process.execPath, args, { cwd: root, env: process.env, stdio: 'inherit' });
     if (result.error || result.status !== 0) process.exit(result.status || 1);

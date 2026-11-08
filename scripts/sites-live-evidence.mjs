@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { checkSecurityHeaders, checkScriptNonces } from './security-evidence.mjs';
+import { SITES_ASSET_URL } from '../profiles/sites/asset-paths.mjs';
 
 export class SiteVerificationError extends Error {}
 const fail = code => { throw new SiteVerificationError(code); };
@@ -34,7 +35,8 @@ export async function inspectPrivateSite(input, request = globalThis.fetch) {
   try { nonce = checkSecurityHeaders(page.headers); html = await page.text(); checkScriptNonces(html, nonce); }
   catch { fail('page_security_policy_failed'); }
   const assets = [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/gi)]
-    .map(match => new URL(match[1], origin)).filter(asset => asset.origin === origin && asset.pathname.startsWith('/_next/static/'));
+    .map(match => new URL(match[1], origin)).filter(asset => asset.origin === origin
+      && [SITES_ASSET_URL, '/_next/static/'].some(prefix => asset.pathname.startsWith(prefix)));
   if (!assets.length) fail('application_asset_missing');
   const asset = assets[0];
   if (!denied(await get(asset.pathname + asset.search))) fail('anonymous_asset_not_denied');

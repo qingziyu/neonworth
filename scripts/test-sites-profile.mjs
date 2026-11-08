@@ -52,6 +52,9 @@ try {
   assert.throws(()=>exportSitesSource(source,join(temporary,'linked-instance')),/never symlinks/);
 
   const built=join(temporary,'built');mkdirSync(join(built,'.openai'),{recursive:true});mkdirSync(join(built,'dist/.openai/drizzle/meta'),{recursive:true});mkdirSync(join(built,'dist/server'),{recursive:true});
+  mkdirSync(join(built,'dist/client/.vite'),{recursive:true});mkdirSync(join(built,'dist/client/_next/static'),{recursive:true});
+  writeFileSync(join(built,'dist/client/.vite/manifest.json'),JSON.stringify({app:{file:'__neonworth_assets/_next/static/app.js',css:['__neonworth_assets/_next/static/app.css']}}));
+  writeFileSync(join(built,'dist/client/_next/static/app.js'),'synthetic JS');writeFileSync(join(built,'dist/client/_next/static/app.css'),'synthetic CSS');
   const config={main:'index.js',assets:{binding:'ASSETS',run_worker_first:true,directory:'../client'},vars:{SITES_LOCAL_DEV:'false'},workers_dev:false,preview_urls:false,d1_databases:[{binding:'DB'}]};
   const saved=structuredClone(config);assert.doesNotThrow(()=>verifySitesBuildConfiguration(config));assert.deepEqual(config,saved);
   for(const changed of [{assets:{binding:'ASSETS',run_worker_first:false}},{vars:{SITES_LOCAL_DEV:'true'}},{vars:{SITES_LOCAL_DEV:'false',SOURCE_SECRET:'synthetic'}},{workers_dev:true},{preview_urls:true},{services:[{binding:'CONNECTORS'}]},{r2_buckets:[{binding:'BUCKET'}]},{d1_databases:[{binding:'OTHER'}]},{routes:['example.invalid/*']},{kv_namespaces:[{binding:'OTHER'}]},{ai:{binding:'AI'}},{durable_objects:{bindings:[{name:'OTHER'}]}},{main:'wrong.js'}])assert.throws(()=>verifySitesBuildConfiguration({...config,...changed}),/unexpected bindings/);
@@ -83,7 +86,8 @@ globalThis.__sitesSyntheticHandler={fetch:async(request,env,ctx)=>{appCalls++;ca
 const hook=registerHooks({resolve(specifier,context,next){return specifier==='vinext/server/fetch-handler'?{url:'data:text/javascript,export default globalThis.__sitesSyntheticHandler;',shortCircuit:true}:next(specifier,context)}});
 try {
   const {default:worker}=await import('../worker/sites.ts');
-  const db={},assets={fetch:async request=>{assetCalls++;assert.equal(request.headers.get('authorization'),null);assert.equal(request.headers.get('oai-authenticated-user-id'),null);return new Response('asset')}};
+  const assetRequests=[];
+  const db={},assets={fetch:async request=>{assetCalls++;assetRequests.push(request);assert.equal(request.headers.get('authorization'),null);assert.equal(request.headers.get('oai-authenticated-user-id'),null);return new Response('asset',{headers:{'cache-control':'public, max-age=31536000'}})}};
   const env={DB:db,ASSETS:assets,BUCKET:{},SOURCE_SECRET:'synthetic-secret',get CONNECTORS(){throw new Error('Grant must not be read')}};
   const ctx={waitUntil(){},passThroughOnException(){},abort(){},props:{CONNECTORS:{invoke(){throw new Error('must not invoke')}}},exports:{private:true}};
   for(const headers of [{},{authorization:'Bearer synthetic','oai-sites-authorization':'Bearer synthetic','oai-authenticated-user-id':'synthetic-owner',cookie:'session=synthetic','cf-access-jwt-assertion':'synthetic'}]){
@@ -95,5 +99,14 @@ try {
   }
   const denied=await worker.fetch(new Request('https://synthetic.example/api/import',{method:'POST',headers:{origin:'https://other.invalid'},body:'synthetic'}),env,ctx);assert.equal(denied.status,403);assert.equal(appCalls,2);
   const staticResponse=await worker.fetch(new Request('https://synthetic.example/_next/static/app.js',{headers:{authorization:'Bearer synthetic','oai-authenticated-user-id':'synthetic'}}),env,ctx);assert.equal(await staticResponse.text(),'asset');assert.equal(assetCalls,1);assert.equal(appCalls,2);
+  for(const method of ['GET','HEAD']){
+    const response=await worker.fetch(new Request('https://synthetic.example/__neonworth_assets/_next/static/lazy.js?v=1',{method,headers:{authorization:'Bearer synthetic',cookie:'synthetic','oai-sites-authorization':'Bearer synthetic'}}),env,ctx);
+    assert.equal(response.status,200);assert.equal(assetRequests.at(-1).url,'https://synthetic.example/_next/static/lazy.js?v=1');assert.equal(assetRequests.at(-1).method,method);
+    for(const key of ['authorization','cookie','oai-sites-authorization'])assert.equal(assetRequests.at(-1).headers.get(key),null);
+    assert.equal(response.headers.get('cache-control'),'private, no-store, max-age=0');assert.equal(response.headers.get('x-content-type-options'),'nosniff');assert.ok(response.headers.get('content-security-policy'));assert.ok(response.headers.get('strict-transport-security'));
+  }
+  for(const path of ['/__neonworth_assets','/__neonworth_assets/api/data','/__neonworth_assets/_next/static/','/__neonworth_assets/_next/static/%2fapp.js','/__neonworth_assets/_next/static/a//app.js'])assert.equal((await worker.fetch(new Request('https://synthetic.example'+path),env,ctx)).status,404);
+  assert.equal((await worker.fetch(new Request('https://synthetic.example/__neonworth_assets/_next/static/lazy.js',{method:'POST'}),env,ctx)).status,404);
+  assert.equal(assetCalls,3);assert.equal(appCalls,2,'Malformed/mutation asset requests never reach application or asset handlers');
 } finally {hook.deregister();globalThis.__sitesSyntheticHandler=original}
 console.log('Sites profile: isolated tracked-source export, manifest/binding/build mutations, no-overwrite setup, post-Dispatch request/body isolation, fixed origin denial and credential-free asset/app forwarding passed. Native audience/authentication requires live verification.');

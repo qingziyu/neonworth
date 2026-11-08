@@ -7,6 +7,7 @@ if (!['dev', 'build'].includes(command) || args.some(arg => /^--(?:host|https|co
 const root = fileURLToPath(new URL('../', import.meta.url));
 process.chdir(root);
 readSitesManifest(root); configureToolEnvironment(root);
+process.env.NEONWORTH_HOSTING_PROFILE = 'sites';
 const cli = new URL('../node_modules/vinext/dist/cli.js', import.meta.url);
 process.argv = [process.execPath, fileURLToPath(cli), command, ...args, '--config', fileURLToPath(new URL('../vite.sites.config.ts', import.meta.url)), ...(command === 'dev' ? ['--host', '127.0.0.1'] : [])];
 await import(cli.href);

@@ -14,8 +14,9 @@ function transport(change={}){
     requests.push({url,init});assert.equal(init.redirect,'manual');assert.ok(url.startsWith(origin+'/'));
     const path=new URL(url).pathname, authorized=init.headers['OAI-Sites-Authorization']===`Bearer ${token}`;
     if(!authorized)return new Response('',{status:change.leakAnonymous?200:403});
-    if(path==='/')return new Response(`<script nonce="${nonce}" src="/_next/static/example.js"></script>`,{headers:change.badHeaders?{}:headers});
-    if(path.startsWith('/_next/static/'))return new Response('/* synthetic */',{headers});
+    const assetPrefix=change.canonical?'/_next/static/':'/__neonworth_assets/_next/static/';
+    if(path==='/')return new Response(`<script nonce="${nonce}" src="${assetPrefix}example.js"></script>`,{headers:change.badHeaders?{}:headers});
+    if(path.startsWith(assetPrefix))return new Response('/* synthetic */',{headers:change.badAssetHeaders?{}:headers});
     const value=structuredClone(records[path]);
     if(path==='/api/status' && change.running)value.refresh={lastRun:{status:'running'}};
     if(path==='/api/data' && change.race && reads++>0)value.settings={savingsTarget:1};
@@ -30,7 +31,8 @@ assert.ok(!JSON.stringify(evidence).includes(token));
 assert.ok(valid.requests.every(row=>new URL(row.url).origin===origin),'Service credentials never follow redirects to another origin');
 assert.equal(comparePrivateSiteEvidence(evidence,{...evidence,checkedAt:'later'}),true);
 assert.throws(()=>comparePrivateSiteEvidence(evidence,{...evidence,hashes:{...evidence.hashes,planning:'different'}}),/saved_records_changed/);
-for(const [change,error] of [[{leakAnonymous:true},/anonymous_access_not_denied/],[{badHeaders:true},/page_security_policy_failed/],[{running:true},/refresh_in_progress/],[{race:true},/records_changed_during_verification/]])
+assert.equal((await inspectPrivateSite({origin,token,privatePublicationConfirmed:true},transport({canonical:true}).request)).assetsProtected,true);
+for(const [change,error] of [[{leakAnonymous:true},/anonymous_access_not_denied/],[{badHeaders:true},/page_security_policy_failed/],[{badAssetHeaders:true},/asset_security_policy_failed/],[{running:true},/refresh_in_progress/],[{race:true},/records_changed_during_verification/]])
   await assert.rejects(inspectPrivateSite({origin,token,privatePublicationConfirmed:true},transport(change).request),error);
 await assert.rejects(inspectPrivateSite({origin,token,privatePublicationConfirmed:false},valid.request),/native_private_publication_required/);
 await assert.rejects(inspectPrivateSite({origin:'https://unrelated.example',token,privatePublicationConfirmed:true},valid.request),/invalid_origin/);

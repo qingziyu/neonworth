@@ -7,6 +7,7 @@
 - Added atomic first-import protection and high-confidence source salary/interest normalization without employer assumptions.
 - Added setup, refresh, upgrade and recovery prompts, a routed skill, an instructions-only plugin and a repository plugin catalog.
 - Added private Site HTTP verification and saved-record hash comparisons; code publication, financial refresh and scheduling remain distinct operations.
+- Routed Sites-built JavaScript and CSS through the private Worker response boundary, with artifact checks for initial and lazy-loaded chunks.
 
 ## 0.1.0-alpha.2
 

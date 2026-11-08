@@ -28,7 +28,7 @@
     "contracts:check": "node --import ./scripts/test-support/register.mjs scripts/export-schema.mjs --check",
     "sites:export": "node scripts/export-sites.mjs",
     "sites:setup": "node scripts/setup-sites.mjs",
-    "sites:build": "node scripts/run-sites.mjs build && node scripts/verify-sites-build.mjs",
+    "sites:build": "node scripts/run-sites.mjs build && node scripts/prepare-sites-assets.mjs && node scripts/verify-sites-build.mjs",
     "sites:dev": "node scripts/run-sites.mjs dev",
     "sites:migrate:local": "node --import ./scripts/runtime-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local --config profiles/sites/wrangler.jsonc --persist-to .wrangler/sites-state",
     "sites:check": "node scripts/check-sites-build.mjs",
