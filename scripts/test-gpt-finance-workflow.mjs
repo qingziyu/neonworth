@@ -5,6 +5,7 @@ import { mock } from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
 import { readFile, writeFile, mkdtemp, rm, mkdir, stat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import './test-support/register.mjs';
@@ -60,7 +61,7 @@ const db=new DatabaseSync(':memory:');db.exec('CREATE TABLE finance_records(key 
 let rollback=false,deferBatch=false,deferredBatch=null;
 const statement=(sql,args=[])=>({sql,args,bind(...values){return statement(sql,values)},async first(){return db.prepare(sql).get(...args)||null},async all(){return {results:db.prepare(sql).all(...args)}}});
 const binding={prepare:sql=>statement(sql),async batch(ops){if(deferBatch){deferBatch=false;deferredBatch=ops;throw new Error('D1_ERROR: Network connection lost.');}db.exec('BEGIN');try{const out=ops.map((op,i)=>{if(rollback&&i===ops.length-1)throw new Error('synthetic rollback');return {success:true,meta:db.prepare(op.sql).run(...op.args)}});db.exec('COMMIT');return out}catch(error){db.exec('ROLLBACK');throw error}finally{rollback=false}}};
-const temp=await mkdtemp('/private/tmp/neonworth-finance-workflow-');
+const temp=await mkdtemp(path.join(tmpdir(),'neonworth-finance-workflow-'));
 try{
  globalThis.__neonworthWorkflowEnv={DB:binding};
  const paths=new Map(['store','refresh','planning-store'].map(name=>[name,path.join(temp,`${name}.ts`)]));
